@@ -10,7 +10,7 @@ const hyperscript 	= require('mithril/hyperscript')
 
 
 
-const _bundled_mithril = fs.readFileSync(path.resolve(__dirname, './node_modules/mithril/mithril.min.js'),'utf8')
+const _bundled_mithril = fs.readFileSync(require.resolve('mithril/mithril.min.js'),'utf8')
 
 
 
