@@ -2,6 +2,7 @@ const webpack 		= require('webpack')
 const MemoryFS 		= require('memory-fs')
 const path 			= require('path')
 const fs 		 	= require('fs')
+const shortid 		= require('shortid')
 
 const render 		= require('mithril-node-render')
 const hyperscript 	= require('mithril/hyperscript')
@@ -10,7 +11,7 @@ const hyperscript 	= require('mithril/hyperscript')
 
 
 
-const _bundled_mithril = fs.readFileSync(require.resolve('mithril/mithril.min.js'),'utf8')
+const _bundled_framework = fs.readFileSync(require.resolve('mithril/mithril.min.js'),'utf8')
 
 
 
@@ -50,6 +51,7 @@ const compile = (input) => {
 	
 	let _bundled_files = ''
 
+	const _bundle_id = shortid.generate()
 
 	const fs = new MemoryFS()
 
@@ -58,11 +60,11 @@ const compile = (input) => {
 		output: {
 			path: _caller_dir_path,
             filename: 'bundle.js',
-            library: _target_file_path,
+            library: _bundle_id,
             libraryTarget: 'umd'
         },
 		externals: {
-	        "crazy-taxi": "m"
+	        "crazy-taxi": 'm'
 	    },
 	    module: {
 			loaders: [
@@ -75,29 +77,29 @@ const compile = (input) => {
 
 	compiler.run(function(err, stats) {
 
-		// console.log(stats.toString({
-  //           chunks: false,
-  //           colors: true
-  //       }))
-		// console.log(_caller_dir_path)
 	  	_bundled_files = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js'), 'utf8')
 
-	  	// console.log(_bundled_files.slice(0,30))
 	})
 
-	return (params) => {
+	return (params, config) => {
+
+		if(false)
 
 		params = params || {}
+		config = config || {}
+
+		const render_id = shortid.generate()
 
 		let output_string = `
-			<div id="${_target_file_path}">
-			${render(hyperscript(_compiled_files, params))}
+			<div id="${render_id}">
+				${render(hyperscript(_compiled_files, params))}
+			</div>
 
 			<script>
-				${_bundled_mithril}
+				${config.exclude_framework ? '' : _bundled_framework}
 				${_bundled_files}
-				window['${_target_file_path}-init'] = ${JSON.stringify(params)}
-				m.mount(document.getElementById('${_target_file_path}'), {view: function () { return m(window['${_target_file_path}'], window['${_target_file_path}-init'])}})
+				window['${render_id}-data'] = ${JSON.stringify(params)}
+				m.mount(document.getElementById('${render_id}'), {view: function () { return m(window['${_bundle_id}'], window['${render_id}-data'])}})
 			</script>
 		`
 

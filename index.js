@@ -9,8 +9,17 @@ c.prop = require("mithril/stream")
 c.redraw = redrawService.publish
 c.parseQueryString = require("mithril/querystring/parse")
 c.buildQueryString = require("mithril/querystring/build")
+
 c.version = "bleeding-edge"
 
 c.compile = require('./compile')
+
+
+
+// Polyfill
+
+c.request = require('mithril/stream')
+c.jsonp = require('mithril/stream')
+
 
 module.exports = c
