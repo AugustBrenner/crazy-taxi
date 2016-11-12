@@ -17,9 +17,16 @@ c.compile = require('./compile')
 
 
 // Polyfill
+var stream = require('mithril/stream')
 
-c.request = require('mithril/stream')
-c.jsonp = require('mithril/stream')
+var streamPolyfill = function(args){
+	stream = Stream()
+	if (args.initialValue !== undefined) stream(args.initialValue)
+	return stream
+}
+
+c.request = streamPolyfill
+c.jsonp = streamPolyfill
 
 
 module.exports = c
