@@ -1,7 +1,7 @@
 'use strict'
 
-const express 	= require('express')
-const c 		= require('crazy-taxi')
+var express   = require('express')
+var c         = require('crazy-taxi')
 
 
 const component = c.compile('./component.js')
