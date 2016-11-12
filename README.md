@@ -1,6 +1,6 @@
 Crazy Taxi
 ========
-Universal Javascript easy and seamless
+Universal Javascript: easy and seamless
 
 ----------
 
