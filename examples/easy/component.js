@@ -1,18 +1,13 @@
+'use strict'
 
-// Dependencies =====================================================
 var c = require('crazy-taxi')
 
 
-// The component =====================================================
 var Component = {
-
-    // This is the oninit lifecycle method. It is called before the view renders.
+    // Lifecycle method, called before the view renders.
     oninit: function(vnode) {
-
-        // Set the name from the passed in attribute 'name'.
         vnode.state.name = vnode.attrs.name
 
-        // Attach a function to the view that changes the name to a random one.
         vnode.state.randomName = function(e){
             var name_array = [
                 'Benedict Kapusniak',
@@ -33,17 +28,12 @@ var Component = {
             url: "https://jsonplaceholder.typicode.com/posts",
             initialValue: []
         })
-
     },
    
-   // This is the view. It renders hyperscript.
     view: function(vnode) {
         return c('div', [
-
         	c('h1', ['Hello ' + vnode.state.name]),
-
             c('button', {onclick: vnode.state.randomName}, 'Say Hi!'),
-
             c('pre', JSON.stringify(vnode.state.async_response().slice(0, 4), null, 4))
         ])
     }
