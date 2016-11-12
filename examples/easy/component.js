@@ -4,7 +4,7 @@ var c = require('crazy-taxi')
 
 
 // The component =====================================================
-const Component = {
+var Component = {
 
     // This is the oninit lifecycle method. It is called before the view renders.
     oninit: function(vnode) {

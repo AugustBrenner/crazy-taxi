@@ -5,8 +5,7 @@
   "main": "server.js",
   "dependencies": {
     "crazy-taxi": "^0.1.5",
-    "express": "^4.14.0",
-    "node-random-name": "^1.0.1"
+    "express": "^4.14.0"
   },
   "devDependencies": {},
   "scripts": {
