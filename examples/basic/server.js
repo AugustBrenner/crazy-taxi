@@ -1,24 +1,15 @@
 'use strict'
 
-// Node Modules =====================================================
-const express 		= require('express')
-const c 			= require('crazy-taxi')
+var express   = require('express')
+var c         = require('crazy-taxi')
 
 
-// Server Config =====================================================
-const app = express()
-
-
-// Routes ============================================================
 const component = c.compile('./component.js')
 
+const app = express()
 
 app.get('*', (req, res) => {
-
 	res.send(component({text: 'Hello World!'}))
-
 })
 
-
-// Run Server ========================================================
 app.listen(3000)

@@ -1,45 +1,29 @@
 'use strict'
 
-// Node Modules =====================================================
-const express 		= require('express')
-const ct 			= require('crazy-taxi')
-const random_name 	= require('node-random-name')
+var express 		= require('express')
+var ct 			    = require('crazy-taxi')
+var random_name     = require('node-random-name')
 
 
-
-// Server Config =====================================================
-const app = express()
+const component = ct.compile('./component.js')
 
 
-const asyncFunction = () => new Promise((resolve, reject) => {
-	
+const asyncFunction = () => new Promise((resolve, reject) => {	
 	setTimeout(() => {
-
 		resolve(random_name())
-
 	}, 100)
 })
 
 
-
-// Routes =====================================================
-const component = ct.compile('./component.js')
+const app = express()
 
 app.get('*', (req, res) => {
-
 	asyncFunction().then(name => {
-
 		res.send(`
-
 			${component({name: name})}
-
 			${component({name: 'Joe Schmoe'}, {exclude_framework: true})}
 		`)
 	})
-
 })
 
-
-// Run Server =====================================================
 app.listen(3000)
-
