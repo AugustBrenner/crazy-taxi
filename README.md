@@ -32,7 +32,9 @@ The rendering of each component is independent, and functions independently on t
 			</p>
 
 			<div>
-				<p>Don't be afraid to write HUUUUGE components!</p>
+				<p>
+					Don't be afraid to write HUUUUGE components!
+				</p>
 				${huge_component_with_lots_of_children()}
 			</div>
 		</body>
