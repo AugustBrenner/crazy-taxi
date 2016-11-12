@@ -17,10 +17,10 @@ c.compile = require('./compile')
 
 
 // Polyfill
-var stream = require('mithril/stream')
+var _stream = require('mithril/stream')
 
 var streamPolyfill = function(args){
-	stream = Stream()
+	var stream = _stream()
 	if (args.initialValue !== undefined) stream(args.initialValue)
 	return stream
 }

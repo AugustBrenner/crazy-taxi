@@ -98,8 +98,7 @@ const compile = (input) => {
 			<script>
 				${config.exclude_framework ? '' : _bundled_framework}
 				${_bundled_files}
-				window['${render_id}-data'] = ${JSON.stringify(params)}
-				m.mount(document.getElementById('${render_id}'), {view: function () { return m(window['${_bundle_id}'], window['${render_id}-data'])}})
+				m.mount(document.getElementById('${render_id}'), {view: function () { return m(window['${_bundle_id}'], ${JSON.stringify(params)})}})
 			</script>
 		`
 

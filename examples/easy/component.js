@@ -33,10 +33,6 @@ const Component = {
             url: "https://jsonplaceholder.typicode.com/posts",
             initialValue: []
         })
-        .run(function(posts){
-            
-            return posts.slice(0, 4)
-        })
 
     },
    
@@ -48,7 +44,7 @@ const Component = {
 
             c('button', {onclick: vnode.state.randomName}, 'Say Hi!'),
 
-            c('pre', JSON.stringify(vnode.state.async_response(), null, 4))
+            c('pre', JSON.stringify(vnode.state.async_response().slice(0, 4), null, 4))
         ])
     }
 }
