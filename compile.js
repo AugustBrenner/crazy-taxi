@@ -1,17 +1,18 @@
-const webpack 		= require('webpack')
-const MemoryFS 		= require('memory-fs')
-const path 			= require('path')
-const fs 		 	= require('fs')
-const shortid 		= require('shortid')
+'use strict'
+var webpack 		= require('webpack')
+var MemoryFS 		= require('memory-fs')
+var path 			= require('path')
+var fs 		 		= require('fs')
+var shortid 		= require('shortid')
 
-const render 		= require('mithril-node-render')
-const hyperscript 	= require('mithril/hyperscript')
-
-
-
+var render 			= require('mithril-node-render')
+var hyperscript 	= require('mithril/hyperscript')
 
 
-const _bundled_framework = fs.readFileSync(require.resolve('mithril/mithril.min.js'),'utf8')
+
+
+
+var _bundled_framework = fs.readFileSync(require.resolve('mithril/mithril.min.js'),'utf8')
 
 
 
@@ -41,21 +42,21 @@ function _getCallerFile() {
 
 
 
-const compile = (input) => {
+var compile = (input) => {
 
-	const _caller_dir_path = path.dirname(_getCallerFile())
+	var _caller_dir_path = path.dirname(_getCallerFile())
 
-	const _target_file_path  = path.resolve(_caller_dir_path, input)
+	var _target_file_path  = path.resolve(_caller_dir_path, input)
 
-	const _compiled_files = require(_target_file_path)
+	var _compiled_files = require(_target_file_path)
 	
-	let _bundled_files = ''
+	var _bundled_files = ''
 
-	const _bundle_id = shortid.generate()
+	var _bundle_id = shortid.generate()
 
-	const fs = new MemoryFS()
+	var fs = new MemoryFS()
 
-	const compiler = webpack({
+	var compiler = webpack({
 		entry: _target_file_path,
 		output: {
 			path: _caller_dir_path,
@@ -88,19 +89,19 @@ const compile = (input) => {
 		params = params || {}
 		config = config || {}
 
-		const render_id = shortid.generate()
+		var render_id = shortid.generate()
 
-		let output_string = `
-			<div id="${render_id}">
-				${render(hyperscript(_compiled_files, params))}
-			</div>
+		var output_string = 
+			'<div id="' + render_id + '">' +
+				render(hyperscript(_compiled_files, params)) +
+			'</div>' +
 
-			<script>
-				${config.exclude_framework ? '' : _bundled_framework}
-				${_bundled_files}
-				m.mount(document.getElementById('${render_id}'), {view: function () { return m(window['${_bundle_id}'], ${JSON.stringify(params)})}})
-			</script>
-		`
+			'<script>' +
+				(config.exclude_framework ? '' : _bundled_framework) +
+				_bundled_files + 
+				"m.mount(document.getElementById('" + render_id + "'), {view: function () { return m(window['" + _bundle_id + "'], " + JSON.stringify(params) + ")}})" +
+			'</script>'
+		
 
 		return output_string
 	}
