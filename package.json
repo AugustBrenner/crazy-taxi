@@ -1,7 +1,7 @@
 {
   "name": "crazy-taxi",
   "version": "0.1.6",
-  "description": "A wrapper around mithril that utilizes mithril-node-render and webpack to render mithril templates server side along with their bundle so that tehy function seamlessly on the client.",
+  "description": "A wrapper around mithril that utilizes mithril-node-render and webpack to render mithril templates server side along with their bundle so that they function seamlessly on the client.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

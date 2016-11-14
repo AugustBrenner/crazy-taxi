@@ -1,6 +1,6 @@
 Crazy Taxi
 ========
-Universal Javascript easy and seamless
+Universal Javascript: easy and seamless
 
 ----------
 
@@ -16,25 +16,29 @@ Crazy taxi is based on Mithril.js and uses hyperscript syntax (pure JS) for it's
 
 The rendering of each component is independent, and functions independently on the front end.  Any attributes you pass into the compiled function are pre-rendered and hydrated automatically on the client!
 
-	`<head>
-		<title>Craaaaazy Taaaaxi</title>
-	</head>
-	
-	<body>
-	 	<h1>
-			${  component_one({name: ‘Joe’})  }
-			${  component_one({name: ‘Schmoe’})  }
-		<h2>
-		
-		<p>
-			${  component_two({title: ‘Programmer’})  }
-		</p>
+	var rendered_page = `
+		<head>
+			<title>Craaaaazy Taaaaxi</title>
+		</head>
 
-		<div>
-			<p>Don't be afraid to write HUUUUGE components!</p>
-			${  HUGE_COMPONENT_with_lots_of_children()  }
-		</div>
-	</body>`
+		<body>
+			<h1>
+				${component_one({name: ‘Joe’})}
+				${component_one({name: ‘Schmoe’})}
+			<h2>
+
+			<p>
+				${component_two({title: ‘Programmer’})}
+			</p>
+
+			<div>
+				<p>
+					Don't be afraid to write HUUUUGE components!
+				</p>
+				${huge_component_with_lots_of_children()}
+			</div>
+		</body>
+	`
 
 
 Template Engine:
