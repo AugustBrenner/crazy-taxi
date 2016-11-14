@@ -1,9 +1,9 @@
 'use strict'
 var webpack 		= require('webpack')
 var MemoryFS 		= require('memory-fs')
+var shortid 		= require('shortid')
 var path 			= require('path')
 var fs 		 		= require('fs')
-var shortid 		= require('shortid')
 
 var render 			= require('mithril-node-render')
 var hyperscript 	= require('mithril/hyperscript')
