@@ -84,8 +84,6 @@ var compile = (input) => {
 
 	return (params, config) => {
 
-		if(false)
-
 		params = params || {}
 		config = config || {}
 
