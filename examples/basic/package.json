@@ -4,7 +4,7 @@
   "description": "A simple example of crazy taxi",
   "main": "server.js",
   "dependencies": {
-    "crazy-taxi": "^0.1.7",
+    "crazy-taxi": "^0.1.8",
     "express": "^4.14.0"
   },
   "devDependencies": {},
