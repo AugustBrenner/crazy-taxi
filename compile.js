@@ -106,7 +106,7 @@ var compile = (input) => {
 		var output_string = 
 			'<div id="' + render_id + '">' +
 			'</div>' +
-				output
+				output +
 			'<script>' +
 				(config.exclude_framework ? '' : _bundled_framework) +
 				_bundled_files + 
