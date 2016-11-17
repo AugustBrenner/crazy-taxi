@@ -25,7 +25,7 @@
   "dependencies": {
     "ignore-loader": "^0.1.2",
     "memory-fs": "^0.3.0",
-    "mithril": "^1.0.0-rc.5",
+    "mithril": "^1.0.0-rc.2",
     "mithril-node-render": "stephanhoyer/mithril-node-render#f85eea53029177297cc87297ccb7f6e4233c3234",
     "shortid": "^2.2.6",
     "webpack": "^1.13.3"
