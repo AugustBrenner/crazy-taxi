@@ -89,11 +89,24 @@ var compile = (input) => {
 
 		var render_id = shortid.generate()
 
+		try{
+			var output = render(hyperscript(_compiled_files, params))
+		}
+		catch(e){
+
+			var error_message = e.toString() + '\n'
+			if(e.stack) e.stack.forEach((callsite, index) => {
+				error_message += '  ' + callsite.getFileName() + ': ' + callsite.getLineNumber() + '\n'
+			})
+			console.error(error_message)
+
+			var output = ''
+		}
+
 		var output_string = 
 			'<div id="' + render_id + '">' +
-				render(hyperscript(_compiled_files, params)) +
 			'</div>' +
-
+				output
 			'<script>' +
 				(config.exclude_framework ? '' : _bundled_framework) +
 				_bundled_files + 
