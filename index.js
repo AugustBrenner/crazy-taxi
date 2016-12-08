@@ -25,8 +25,8 @@ c.compile = require('./compile')
 // 	return stream
 // }
 
-c.request = () => new Promise()
-c.jsonp = () => new Promise()
+c.request = () => new Promise((resolve, reject) => {})
+c.jsonp = () => new Promise((resolve, reject) => {})
 
 
 module.exports = c
