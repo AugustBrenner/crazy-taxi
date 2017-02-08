@@ -110,7 +110,7 @@ var compile = (input) => {
 			'<script>' +
 				(config.exclude_framework ? '' : _bundled_framework) +
 				_bundled_files + 
-				"m.mount(document.getElementById('" + render_id + "'), {view: function () { return m(window['" + _bundle_id + "'], " + JSON.stringify(params).replace('\u2028', '\\u2028').replace('\u2029', '\\u2029') + ")}})" +
+				"m.mount(document.getElementById('" + render_id + "'), {view: function () { return m(window['" + _bundle_id + "'], " + JSON.stringify(params).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ")}})" +
 			'</script>'
 		
 
