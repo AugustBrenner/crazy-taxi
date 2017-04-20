@@ -182,7 +182,7 @@ var compile = (input) => {
 
 			// console.log(path.resolve(_caller_dir_path, 'bundle.js'))
 	  		_bundled_files = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js'), 'utf8')
-	  		if(Object.keys(stats.compilation.assets).indexOf('bundle.css')) _bundled_styles = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.css'), 'utf8')
+	  		if(Object.keys(stats.compilation.assets).indexOf('bundle.css') > -1) _bundled_styles = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.css'), 'utf8')
 	  		// _source_maps = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js.map'), 'utf8')
 		}
 		catch(e){
