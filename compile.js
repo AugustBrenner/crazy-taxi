@@ -4,6 +4,7 @@ var MemoryFS 		= require('memory-fs')
 var shortid 		= require('shortid')
 var path 			= require('path')
 var fs 		 		= require('fs')
+var StringReplacePlugin = require("string-replace-webpack-plugin")
 
 var render 			= require('mithril-node-render')
 var hyperscript 	= require('mithril/hyperscript')
@@ -68,17 +69,59 @@ var compile = (input) => {
 	        "crazy-taxi": 'm'
 	    },
 	    module: {
-			loaders: [
-				{ test: /crazy-taxi/, loader: 'ignore-loader' }
+			rules: [
+			 	{
+		        	test: /\.css$/,
+		        	use: [
+						{
+							loader: "style-loader"
+						},
+						{
+							loader: "css-loader",
+						}
+        			]
+		        },
+				{ 
+		            test: /\.js$/,
+		            loader: StringReplacePlugin.replace({
+		                replacements: [
+		                    {
+		                        pattern: /c\.requireOnClient/g,
+		                        replacement: function (match, p1, offset, string) {
+		                            return 'require'
+		                        }
+		                    }
+		                ]
+		            })
+		        },
+		        { 
+					test: /^crazy-taxi$/,
+					loader: 'ignore-loader'
+				},
 			]
-		}
+		},
+		plugins: [
+	      	new StringReplacePlugin()
+	   	]
 	})
 
 	compiler.outputFileSystem = fs
 
 	compiler.run(function(err, stats) {
+		// console.log(stats)
+		try{
+			// console.log(path.resolve(_caller_dir_path, 'bundle.js'))
+	  		_bundled_files = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js'), 'utf8')
+		}
+		catch(e){
 
-	  	_bundled_files = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js'), 'utf8')
+			var error_message = e.toString() + '\n'
+			if(e.stack) e.stack.forEach((callsite, index) => {
+				error_message += '  ' + callsite.getFileName() + ': ' + callsite.getLineNumber() + '\n'
+			})
+			console.error(error_message)
+
+		}
 
 	})
 

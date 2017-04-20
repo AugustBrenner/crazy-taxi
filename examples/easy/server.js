@@ -1,11 +1,11 @@
 'use strict'
 
 var express 		= require('express')
-var ct 			    = require('crazy-taxi')
+var c 			    = require('crazy-taxi')
 var random_name     = require('node-random-name')
 
 
-const component = ct.compile('./component.js')
+const component = c.compile('./component.js')
 
 
 const asyncFunction = () => new Promise((resolve, reject) => {	

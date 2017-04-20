@@ -16,6 +16,8 @@ c.compile = require('./compile')
 
 // c.compileCSS = require('./compileCSS')
 
+c.requireOnClient = function(){}
+
 
 
 // Polyfill
