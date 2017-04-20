@@ -4,6 +4,7 @@ var express 		= require('express')
 var c 			    = require('crazy-taxi')
 var random_name     = require('node-random-name')
 
+c.set('production', true)
 
 const component = c.compile('./component.js')
 
@@ -16,6 +17,7 @@ const asyncFunction = () => new Promise((resolve, reject) => {
 
 
 const app = express()
+
 
 app.get('*', (req, res) => {
 	asyncFunction().then(name => {

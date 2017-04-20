@@ -1,13 +1,18 @@
 'use strict'
-var webpack 		= require('webpack')
-var MemoryFS 		= require('memory-fs')
-var shortid 		= require('shortid')
-var path 			= require('path')
-var fs 		 		= require('fs')
+var webpack 			= require('webpack')
+var MemoryFS 			= require('memory-fs')
+var shortid 			= require('shortid')
+var path 				= require('path')
+var fs 		 			= require('fs')
 var StringReplacePlugin = require("string-replace-webpack-plugin")
+var styleLoader 		= require('style-loader')
+var cssLoader 			= require('css-loader')
+var deasync 			= require('deasync')
 
-var render 			= require('mithril-node-render')
-var hyperscript 	= require('mithril/hyperscript')
+var render 				= require('mithril-node-render')
+var hyperscript 		= require('mithril/hyperscript')
+
+var SETTINGS 			= require('./settings.js')
 
 
 
@@ -53,11 +58,13 @@ var compile = (input) => {
 	
 	var _bundled_files = ''
 
+	var _source_maps = ''
+
 	var _bundle_id = shortid.generate()
 
 	var fs = new MemoryFS()
 
-	var compiler = webpack({
+	var webpack_config = {
 		entry: _target_file_path,
 		output: {
 			path: _caller_dir_path,
@@ -74,10 +81,13 @@ var compile = (input) => {
 		        	test: /\.css$/,
 		        	use: [
 						{
-							loader: "style-loader"
+							loader: "crazy-taxi/node_modules/style-loader"
 						},
 						{
-							loader: "css-loader",
+							loader: "crazy-taxi/node_modules/css-loader",
+							options: {
+								minimize: SETTINGS.get('production')
+							}
 						}
         			]
 		        },
@@ -103,15 +113,63 @@ var compile = (input) => {
 		plugins: [
 	      	new StringReplacePlugin()
 	   	]
-	})
+	}
+
+	if(SETTINGS.get('production')){
+
+		// webpack_config.devtool = 'source-map'
+
+		webpack_config.plugins = webpack_config.plugins.concat([
+
+			new webpack.LoaderOptionsPlugin({
+                minimize: true,
+                debug: false
+            }),
+			
+			new webpack.optimize.UglifyJsPlugin({
+		      	// sourceMap: webpack_config.devtool && (webpack_config.devtool.indexOf("sourcemap") >= 0 || webpack_config.devtool.indexOf("source-map") >= 0),
+		      	beautify: false,
+	            mangle: {
+	                screw_ie8: true,
+	                keep_fnames: true
+	            },
+	            compress: {
+	                screw_ie8: true,
+	                warnings: false
+	            },
+	            comments: false
+		    }),
+
+		    new webpack.DefinePlugin({
+		      'process.env.NODE_ENV': JSON.stringify('production')
+		    })
+
+		])
+
+	}
+
+	else {
+		webpack_config.devtool = 'cheap-eval-source-map'
+	}
+
+
+	var compiler = webpack(webpack_config)
 
 	compiler.outputFileSystem = fs
 
-	compiler.run(function(err, stats) {
-		// console.log(stats)
+
+	var bundleFiles = function(err, stats) {
+
+		// if(!SETTINGS.get('production')) 
+		console.log('[webpack:build]', stats.toString({
+            chunks: false,
+            colors: true
+        }))
+
 		try{
 			// console.log(path.resolve(_caller_dir_path, 'bundle.js'))
 	  		_bundled_files = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js'), 'utf8')
+	  		// _source_maps = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js.map'), 'utf8')
 		}
 		catch(e){
 
@@ -123,7 +181,22 @@ var compile = (input) => {
 
 		}
 
-	})
+	}
+
+
+	if(SETTINGS.get('production')){
+		
+		compiler.run(bundleFiles)
+	}
+
+	else {
+		
+		compiler.watch({ 
+		    aggregateTimeout: 300,
+		    // poll: true 
+		}, bundleFiles)
+	}
+
 
 	return (params, config) => {
 
@@ -133,7 +206,20 @@ var compile = (input) => {
 		var render_id = shortid.generate()
 
 		try{
-			var output = render(hyperscript(_compiled_files, params))
+			var output = ''
+			var done = false
+
+			render(hyperscript(_compiled_files, params)).then(function(out){
+				output = out
+				done = true
+			})
+			.catch(function(error){
+				console.error(error)
+				done = true
+			})
+
+			deasync.loopWhile(function(){return !done})
+
 		}
 		catch(e){
 

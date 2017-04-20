@@ -2,6 +2,8 @@
 
 var c = require("mithril/hyperscript")
 
+var SETTINGS = require('./settings.js')
+
 // var redrawService = require("mithril/redraw")
 
 c.withAttr = require("mithril/util/withAttr")
@@ -17,6 +19,9 @@ c.compile = require('./compile')
 // c.compileCSS = require('./compileCSS')
 
 c.requireOnClient = function(){}
+
+c.set = SETTINGS.set
+c.get = SETTINGS.get
 
 
 
