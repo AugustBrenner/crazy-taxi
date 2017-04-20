@@ -25,6 +25,7 @@
   "dependencies": {
     "css-loader": "^0.28.0",
     "deasync": "^0.1.9",
+    "extract-text-webpack-plugin": "^2.1.0",
     "ignore-loader": "^0.1.2",
     "memory-fs": "^0.3.0",
     "mithril": "1.1.1",

@@ -5,6 +5,7 @@ var shortid 			= require('shortid')
 var path 				= require('path')
 var fs 		 			= require('fs')
 var StringReplacePlugin = require("string-replace-webpack-plugin")
+var ExtractTextPlugin 	= require('extract-text-webpack-plugin')
 var styleLoader 		= require('style-loader')
 var cssLoader 			= require('css-loader')
 var deasync 			= require('deasync')
@@ -58,6 +59,8 @@ var compile = (input) => {
 	
 	var _bundled_files = ''
 
+	var _bundled_styles = ''
+
 	var _source_maps = ''
 
 	var _bundle_id = shortid.generate()
@@ -79,17 +82,22 @@ var compile = (input) => {
 			rules: [
 			 	{
 		        	test: /\.css$/,
-		        	use: [
-						{
-							loader: "style-loader"
-						},
-						{
-							loader: "css-loader",
-							options: {
-								minimize: SETTINGS.get('production')
+		        	use: SETTINGS.get('production')
+			          	? ExtractTextPlugin.extract({
+			              	fallback: 'style-loader',
+			              	use: [ 'css-loader' ]
+			          	})
+			          	: [
+							{
+								loader: "style-loader"
+							},
+							{
+								loader: "css-loader",
+								options: {
+									minimize: false
+								}
 							}
-						}
-        			]
+	        			]
 		        },
 				{ 
 		            test: /\.js$/,
@@ -120,6 +128,10 @@ var compile = (input) => {
 		// webpack_config.devtool = 'source-map'
 
 		webpack_config.plugins = webpack_config.plugins.concat([
+
+			new ExtractTextPlugin({
+	          	filename: 'bundle.css'
+	        }),
 
 			new webpack.LoaderOptionsPlugin({
                 minimize: true,
@@ -167,8 +179,10 @@ var compile = (input) => {
         }))
 
 		try{
+
 			// console.log(path.resolve(_caller_dir_path, 'bundle.js'))
 	  		_bundled_files = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js'), 'utf8')
+	  		if(Object.keys(stats.compilation.assets).indexOf('bundle.css')) _bundled_styles = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.css'), 'utf8')
 	  		// _source_maps = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js.map'), 'utf8')
 		}
 		catch(e){
@@ -233,6 +247,7 @@ var compile = (input) => {
 		}
 
 		var output_string = 
+			'<style>' + _bundled_styles + '</style>' +
 			'<div id="' + render_id + '">' +
 				output +
 			'</div>' +
