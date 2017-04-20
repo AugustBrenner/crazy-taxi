@@ -81,10 +81,10 @@ var compile = (input) => {
 		        	test: /\.css$/,
 		        	use: [
 						{
-							loader: "crazy-taxi/node_modules/style-loader"
+							loader: "style-loader"
 						},
 						{
-							loader: "crazy-taxi/node_modules/css-loader",
+							loader: "css-loader",
 							options: {
 								minimize: SETTINGS.get('production')
 							}
