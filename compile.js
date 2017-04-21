@@ -153,7 +153,7 @@ var compile = (input) => {
 		    }),
 
 		    new webpack.DefinePlugin({
-		      'process.env.NODE_ENV': JSON.stringify('production')
+		      	'process.env.NODE_ENV': JSON.stringify('production')
 		    })
 
 		])
@@ -172,10 +172,15 @@ var compile = (input) => {
 
 	var bundleFiles = function(err, stats) {
 
+		console.log(_caller_dir_path)
+
 		// if(!SETTINGS.get('production')) 
 		console.log('[webpack:build]', stats.toString({
             chunks: false,
-            colors: true
+            colors: true,
+            // chunks: true,
+            // maxModules: Infinity,
+            // exclude: undefined,
         }))
 
 		try{
