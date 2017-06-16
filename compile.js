@@ -253,7 +253,7 @@ var compile = (input) => {
 
 		var output_string = 
 			'<style>' + _bundled_styles + '</style>' +
-			'<div id="' + render_id + '">' +
+			'<div id="' + render_id + ' class="ct-root"">' +
 				output +
 			'</div>' +
 			'<script>' +
