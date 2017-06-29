@@ -8,7 +8,6 @@ var StringReplacePlugin = require("string-replace-webpack-plugin")
 var ExtractTextPlugin 	= require('extract-text-webpack-plugin')
 var styleLoader 		= require('style-loader')
 var cssLoader 			= require('css-loader')
-var deasync 			= require('deasync')
 
 var render 				= require('mithril-node-render')
 var hyperscript 		= require('mithril/hyperscript')
