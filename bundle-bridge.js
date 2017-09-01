@@ -19,17 +19,3 @@ module.exports = {
 	shim: BundleBridge,
 	routes: routes, 
 }
-
-
-
-var http = require('http')
-var c = require('crazy-taxi')
-
-var router = c.router('./router.js').s3({
-	bucket_name: '',
-	access_key_id: '',
-	secret_access_key: '',
-	cdn_uri: '',
-})
-
-http.createServer(router).listen(3000)
