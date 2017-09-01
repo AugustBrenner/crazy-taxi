@@ -14,9 +14,6 @@ c.buildQueryString = require("mithril/querystring/build")
 
 c.version = "bleeding-edge"
 
-c.compile = require('./compile')
-c.build = require('./build')
-
 // c.compileCSS = require('./compileCSS')
 
 c.requireOnClient = function(){}
@@ -27,6 +24,10 @@ c.get = SETTINGS.get
 c.route = {
 	link: function(){}
 }
+
+// c.$setOwnProperty = function(key, value){
+// 	c[key] = value
+// }
 
 
 // Polyfill
