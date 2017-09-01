@@ -39,8 +39,8 @@ c.route = {
 // 	return stream
 // }
 
-c.request = () => new Promise((resolve, reject) => {})
-c.jsonp = () => new Promise((resolve, reject) => {})
+c.request = Request.request
+c.jsonp = Request.jsonp
 
 
 module.exports = c
