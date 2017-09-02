@@ -9,40 +9,50 @@ var StringReplacePlugin = require("string-replace-webpack-plugin")
 var ExtractTextPlugin 	= require('extract-text-webpack-plugin')
 var styleLoader 		= require('style-loader')
 var cssLoader 			= require('css-loader')
+var babelLoader 		= require('babel-loader')
 var requireFromString 	= require('require-from-string')
 var Router 				= require('router')
+var url 				= require('url')
+var AWS 				= require('aws-sdk')
+var loki 				= require('lokijs')
 
 var renderHyperscript 	= require('mithril-node-render')
 var hyperscript 		= require('mithril/hyperscript')
+var Request 			= require('./request.js')
 
 var SETTINGS 			= require('./settings.js')
 
+// SETTINGS.set('production', true)
 
 
-
-
-var _bundled_framework = fs.readFileSync(require.resolve('mithril/mithril.min.js'),'utf8')
-
-
-
-
+shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_')
 
 function _getCallerFile() {
+
+	var origPrepareStackTrace = Error.prepareStackTrace
+
     try {
-        var err = new Error();
-        var callerfile;
-        var currentfile;
 
-        Error.prepareStackTrace = function (err, stack) { return stack; };
+    	Error.prepareStackTrace = function (_, stack) { return stack }
+        
+        var error = new Error()
 
-        currentfile = err.stack.shift().getFileName();
+        var stack = error.stack
 
-        while (err.stack.length) {
-            callerfile = err.stack.shift().getFileName();
+        Error.prepareStackTrace = origPrepareStackTrace
 
-            if(currentfile !== callerfile) return callerfile;
+        var currentfile = stack.shift().getFileName()
+
+        var callerfile
+
+        while (stack.length) {
+            
+            callerfile = stack.shift().getFileName()
+
+            if(currentfile !== callerfile) return callerfile
         }
-    } catch (err) {}
+    }
+    catch (err) {}
     return undefined;
 }
 
@@ -51,7 +61,11 @@ function _getCallerFile() {
 
 
 
-var build = function(relative_path) {
+var router = function(relative_path) {
+
+	console.log('Initiated')
+
+	var config = {}
 
 	var _caller_dir_path = path.dirname(_getCallerFile())
 
@@ -59,11 +73,15 @@ var build = function(relative_path) {
 
 	var _compiled_files = {view: function(){}}
 	
-	var _bundled_files_server = ''
+	var _bundled_scripts_server = ''
 
-	var _bundled_files_client = ''
+	var _bundled_scripts_client = ''
+
+	var _bundled_scripts_client_url = ''
 
 	var _bundled_styles_client = ''
+
+	var _bundled_styles_client_url = ''
 
 	var _server_router = Router()
 
@@ -77,10 +95,6 @@ var build = function(relative_path) {
 
 
 
-
-
-
-
 	var webpack_config_client = {
 		entry: _target_file_path,
 		output: {
@@ -89,11 +103,18 @@ var build = function(relative_path) {
 	        library: _bundle_id,
 	        libraryTarget: 'umd'
 	    },
-		externals: {
-	        "crazy-taxi": 'm'
-	    },
+	    // externals: {
+	    //     "crazy-taxi": 'm'
+	    // },
+	   node: {
+			fs: 'empty',
+			net: 'empty',
+			tls: 'empty',
+			'crypto': 'empty'
+		},
 	    module: {
 			rules: [
+
 			 	{
 		        	test: /\.css$/,
 		        	use: ExtractTextPlugin.extract({
@@ -114,14 +135,51 @@ var build = function(relative_path) {
 		                ]
 		            })
 		        },
-		        { 
-					test: /^crazy-taxi$/,
-					loader: 'ignore-loader'
+		        {
+			      	test: /\.js$/,
+			      	exclude: /(node_modules|bower_components)/,
+			      	use: {
+			        	loader: 'babel-loader',
+			        	options: {
+        					presets: ['babel-preset-env'].map(require.resolve),
+      					}
+			      	}
+			    },
+				{
+					test: path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
+					loader: 'expose-loader?c'
 				},
+
+				{
+					test: path.resolve(__dirname, 'node_modules/lokijs'),
+					loader: 'expose-loader?loki'
+				},
+				{
+					test: _target_file_path,
+					loader: 'webpack-append',
+					query: 'require("lokijs")'
+		        },
+
+		  //       { 
+				// 	test: /^crazy-taxi$/,
+				// 	loader: 'ignore-loader'
+				// },
 			]
+		},
+		resolveLoader: {
+			modules: [
+				path.resolve(__dirname, 'node_modules'),
+			],
+		},
+		resolve: {
+			alias: {
+				'crazy-taxi': path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
+				'lokijs': path.resolve(__dirname, 'node_modules/lokijs'),
+			}
 		},
 		plugins: [
 	      	new StringReplacePlugin(),
+
 
 	      	new ExtractTextPlugin({
 	          	filename: 'bundle_client.css'
@@ -181,6 +239,7 @@ var build = function(relative_path) {
 	    },
 	    target: 'node',
 	    module: {
+	    	exprContextCritical: false,
 			rules: [
 			 	{
 		        	test: /\.css$/,
@@ -215,6 +274,21 @@ var build = function(relative_path) {
 		                ]
 		            })
 		        },
+				{
+			      	test: /\.js$/,
+			      	exclude: /(node_modules|bower_components)/,
+			      	use: {
+			        	loader: 'babel-loader',
+			        	options: {
+        					presets: ['babel-preset-env'].map(require.resolve),
+      					}
+			      	}
+			    },
+			]
+		},
+		resolveLoader: {
+			modules: [
+				path.resolve(__dirname, 'node_modules')
 			]
 		},
 		plugins: [
@@ -222,13 +296,6 @@ var build = function(relative_path) {
 		],
 	   	devtool: 'cheap-eval-source-map'
 	}
-
-	console.log(path.resolve(__dirname, "compile.js"))
-
-
-
-
-
 
 
 	var compiler_client = webpack(webpack_config_client)
@@ -255,18 +322,61 @@ var build = function(relative_path) {
 		try{
 
 			// console.log(path.resolve(_caller_dir_path, 'bundle.js'))
-	  		_bundled_files_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.js'), 'utf8')
+	  		_bundled_scripts_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.js'), 'utf8')
 	  		if(Object.keys(stats.compilation.assets).indexOf('bundle_client.css') > -1) _bundled_styles_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.css'), 'utf8')
 	  		// _source_maps = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js.map'), 'utf8')
 
-		}
-		catch(e){
+	  		if(SETTINGS.get('production') && config.s3){
+	  			
+	  			var base_64_data_scripts = new Buffer(_bundled_scripts_client, 'binary')
+	  			var content_length_scripts =  Buffer.byteLength(_bundled_scripts_client, 'binary')
 
-			var error_message = e.toString() + '\n'
-			if(e.stack) e.stack.forEach((callsite, index) => {
-				error_message += '  ' + callsite.getFileName() + ': ' + callsite.getLineNumber() + '\n'
-			})
-			console.error(error_message)
+				config.s3.putObject({
+					Bucket: config.s3_bucket_name,
+					Key: config.s3_bucket_directories + '/' + stats.hash + '.bundle.js',
+					Body: base_64_data_scripts,
+					ACL: 'public-read',
+					CacheControl: 'public, max-age=31536000',
+					ContentLength: content_length_scripts,
+					ContentType: 'application/json; charset=utf-8',
+				}, function (error, response) {
+
+					if(error) return console.error('Failed to upload client scripts. Falling back to inline scripts.')
+
+					console.log('Successfully uploaded client scripts')
+					
+					_bundled_scripts_client_url = config.cdn_url.replace(/\/$/, '') + '/' + stats.hash + '.bundle.js'
+
+				})
+
+				if(_bundled_styles_client){
+
+					var base64dataStyles = new Buffer(_bundled_styles_client, 'binary')
+					var content_length_styles =  Buffer.byteLength(_bundled_styles_client, 'binary')
+
+					config.s3.putObject({
+						Bucket: config.s3_bucket_name,
+						Key: config.s3_bucket_directories + '/' + stats.hash + '.bundle.css',
+						Body: base64dataStyles,
+						ACL: 'public-read',
+						CacheControl: 'public, max-age=31536000',
+						ContentLength: content_length_styles,
+						ContentType: 'text/css; charset=utf-8',
+					}, function (error, response) {
+
+						if(error) return console.error('Failed to upload client styles. Falling back to inline styles.')
+
+						console.log('Successfully uploaded client styles')
+
+						_bundled_styles_client_url = config.cdn_url.replace(/\/$/, '') + '/' + stats.hash + '.bundle.css'
+					})
+				}
+	  		}
+
+		}
+		catch(error){
+
+			console.error(error)
 
 		}
 
@@ -275,49 +385,48 @@ var build = function(relative_path) {
 
 
 
-
-
-	var render = function(shim, component) {
+	var render = function(params) {
 
 		var render_id = shortid.generate()
 
-		var store = {
-			data: null,
-			get: function(){
-				return store.data
-			},
-			set: function(data){
-				store.data = data
-			}
-		}
+		var store = new loki("crazy-taxi.db")
 
-		return renderHyperscript(shim, {
+		return renderHyperscript(params.shim, {
 			store: store,
-			component: component,
+			component: params.component,
+			requestHandler: params.requestHandler,
 		}).then(function(output){
 
 			var output_string = 
-			'<html><head></head><body>' +
-				'<style>' + _bundled_styles_client + '</style>' +
+			'<html><head>' +
+				(!_bundled_styles_client_url ? '<style>' + _bundled_styles_client + '</style>' : '') +
+				(_bundled_styles_client_url ? '<link rel="stylesheet" type="text/css" href="' + _bundled_styles_client_url + '">' : '') +
+			'</head><body>' +
 				'<div id="' + render_id + '" class="ct-root">' +
 					output +
 				'</div>' +
+				(_bundled_scripts_client_url ? '<script src="' + _bundled_scripts_client_url + '"></script>' : '') +
 				'<script>' +
-					_bundled_framework +
-					_bundled_files_client + 
-					"m.store={data:" + JSON.stringify(store.get()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ",get:function(){return m.store.data},set:function(data){m.store.data=data}};" +
-					"m.route.prefix('');m.route(document.getElementById('" + render_id + "'), '/', window['" + _bundle_id + "']);" +
+					
+
+					(!_bundled_scripts_client_url ? _bundled_scripts_client + " " + render_id + "_init();" :
+
+					"(function(c,r,a,z,y){y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
+					"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);") +
+
+					"function " + render_id + "_init(){" +
+						"c.store = new loki('crazy-taxi.db');" +
+						"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
+						"c.route.prefix('');c.route(document.getElementById('" + render_id + "'), '/', window['" + _bundle_id + "']);" +
+					"}" +
+
 				'</script></body>'
 
 			return output_string
 		})
 		.catch(function(error){
 
-			var error_message = error.toString() + '\n'
-			if(error.stack) error.stack.forEach((callsite, index) => {
-				error_message += '  ' + callsite.getFileName() + ': ' + callsite.getLineNumber() + '\n'
-			})
-			console.error(error_message)
+			console.error(error)
 
 			return ''
 
@@ -341,9 +450,9 @@ var build = function(relative_path) {
 		try{
 
 
-	  		_bundled_files_server = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_server.js'), 'utf8')
+	  		_bundled_scripts_server = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_server.js'), 'utf8')
 
-	  		_compiled_files = requireFromString(_bundled_files_server)
+	  		_compiled_files = requireFromString(_bundled_scripts_server)
 
 	  		_server_router = Router()
 
@@ -351,7 +460,20 @@ var build = function(relative_path) {
 
 	  			_server_router.get(key, function(req, res) {
 
-	  				render(_compiled_files.shim, _compiled_files.routes[key])
+					var base_url = url.format({
+					    protocol: req.protocol,
+					    host: req.get('host'),
+					    pathname: req.originalUrl
+					})
+
+	  				render({
+	  					shim:_compiled_files.shim,
+	  					component: _compiled_files.routes[key],
+	  					requestHandler: Request({
+	  						headers: req.headers,
+	  						base_url: base_url,
+	  					}),
+	  				})
 	  				.then(function(result){
 	  					res.send(result)
 	  				})
@@ -359,13 +481,9 @@ var build = function(relative_path) {
 	  		})
 
 		}
-		catch(e){
+		catch(error){
 
-			var error_message = e.toString() + '\n'
-			if(e.stack) e.stack.forEach((callsite, index) => {
-				error_message += '  ' + callsite.getFileName() + ': ' + callsite.getLineNumber() + '\n'
-			})
-			console.error(error_message)
+			console.error(error)
 
 		}
 
@@ -378,6 +496,8 @@ var build = function(relative_path) {
 	if(SETTINGS.get('production')){
 		
 		compiler_client.run(bundleFilesClient)
+
+		compiler_server.run(bundleFilesServer)
 	}
 
 	else {
@@ -394,13 +514,43 @@ var build = function(relative_path) {
 		}, bundleFilesServer)
 	}
 
-
-	return function(req, res, next) {
+	var server = function(req, res, next) {
 		
 		_server_router(req, res, next)
 	}
 
+	// S3 Configuration
+	server.s3 = function(s3_config){
+
+		console.log("S3 Activated")
+
+		s3_config = s3_config || {}
+
+		if(!s3_config.access_key_id || !s3_config.secret_access_key || !s3_config.bucket_url){
+
+			throw "parameters 'access_key_id', 'secret_access_key', and 'bucket_url' are required."
+		}
+
+		var bucket_url_parts = /(amazonaws\.com)\/(.*?)\/(.*)\//.exec(s3_config.bucket_url)
+
+		if(!bucket_url_parts[2]) throw "'bucket_url' is invalid, it must include: {bucket-region}.amazonaws.com/{bucket-name}/{bucket-directories}"
+		
+		s3_config.s3_bucket_name = bucket_url_parts[2]
+
+		s3_config.s3_bucket_directories = bucket_url_parts[3] || ''
+
+		AWS.config.update({accessKeyId: s3_config.access_key_id, secretAccessKey: s3_config.secret_access_key})
+
+		s3_config.s3 = new AWS.S3()
+
+		Object.assign(config, s3_config)
+
+		return server
+	}
+
+	return server
+
 }
 
 
-module.exports = build
+module.exports = router

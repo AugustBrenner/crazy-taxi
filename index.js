@@ -15,7 +15,7 @@ c.buildQueryString = require("mithril/querystring/build")
 c.version = "bleeding-edge"
 
 c.compile = require('./compile')
-c.build = require('./build')
+c.router = require('./build')
 
 // c.compileCSS = require('./compileCSS')
 

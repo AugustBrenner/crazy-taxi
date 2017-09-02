@@ -25,21 +25,31 @@ var _bundled_framework = fs.readFileSync(require.resolve('mithril/mithril.min.js
 
 
 function _getCallerFile() {
+
+	var origPrepareStackTrace = Error.prepareStackTrace
+
     try {
-        var err = new Error();
-        var callerfile;
-        var currentfile;
 
-        Error.prepareStackTrace = function (err, stack) { return stack; };
+    	Error.prepareStackTrace = function (_, stack) { return stack }
+        
+        var error = new Error()
 
-        currentfile = err.stack.shift().getFileName();
+        var stack = error.stack
 
-        while (err.stack.length) {
-            callerfile = err.stack.shift().getFileName();
+        Error.prepareStackTrace = origPrepareStackTrace
 
-            if(currentfile !== callerfile) return callerfile;
+        var currentfile = stack.shift().getFileName()
+
+        var callerfile
+
+        while (stack.length) {
+            
+            callerfile = stack.shift().getFileName()
+
+            if(currentfile !== callerfile) return callerfile
         }
-    } catch (err) {}
+    }
+    catch (err) {}
     return undefined;
 }
 

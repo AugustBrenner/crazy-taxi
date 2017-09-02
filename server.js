@@ -39,8 +39,5 @@ c.route = {
 // 	return stream
 // }
 
-c.request = Request.request
-c.jsonp = Request.jsonp
-
 
 module.exports = c
