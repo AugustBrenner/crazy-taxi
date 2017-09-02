@@ -15,6 +15,7 @@ var Router 				= require('router')
 var url 				= require('url')
 var AWS 				= require('aws-sdk')
 var loki 				= require('lokijs')
+var cheerio 			= require('cheerio')
 
 var renderHyperscript 	= require('mithril-node-render')
 var hyperscript 		= require('mithril/hyperscript')
@@ -397,32 +398,69 @@ var router = function(relative_path) {
 			requestHandler: params.requestHandler,
 		}).then(function(output){
 
-			var output_string = 
-			'<html><head>' +
-				(!_bundled_styles_client_url ? '<style>' + _bundled_styles_client + '</style>' : '') +
-				(_bundled_styles_client_url ? '<link rel="stylesheet" type="text/css" href="' + _bundled_styles_client_url + '">' : '') +
-			'</head><body>' +
-				'<div id="' + render_id + '" class="ct-root">' +
-					output +
-				'</div>' +
-				(_bundled_scripts_client_url ? '<script src="' + _bundled_scripts_client_url + '"></script>' : '') +
-				'<script>' +
+			var $ = cheerio.load(output)
+
+
+			if(_bundled_styles_client_url){
+				$('head').append('<link id="' + render_id + '_styles" rel="stylesheet" type="text/css" href="' + _bundled_styles_client_url + '">')
+			}
+			else {
+				$('head').append('<style id="' + render_id + '_styles">' + _bundled_styles_client + '</style>')
+			}
+
+			$('body').append('<script>' +
+
+				"function " + render_id + "_init(){" +
+					"c.styles = c.trust(document.getElementById('" + render_id + "_styles').outerHTML);" + 
+					"c.scripts = c.trust(document.getElementById('" + render_id + "_scripts').outerHTML);" +
+					"window.global_styles = '" + _bundled_styles_client_url + "';" +
+					"c.store = new loki('crazy-taxi.db');" +
+					"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
+					"c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
+				"}" +
+
+			'</script>')
+
+			if(_bundled_scripts_client_url){
+				$('body').append('<script id="' + render_id + '_scripts">' + 
+					"(function(c,r,a,z,y){" +
+						"y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
+					"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);" + 
+				"</script>")
+			}
+
+			else {
+				$('body').append('<script id="' + render_id + '_scripts">' + _bundled_scripts_client + ' ' + render_id + '_init();</script>')
+			}
+
+
+			// var output_string = 
+			// '<html><head>' +
+			// 	(!_bundled_styles_client_url ? '<style>' + _bundled_styles_client + '</style>' : '') +
+			// 	(_bundled_styles_client_url ? '<link rel="stylesheet" type="text/css" href="' + _bundled_styles_client_url + '">' : '') +
+			// '</head><body>' +
+			// 	'<div id="' + render_id + '" class="ct-root">' +
+			// 		output +
+			// 	'</div>' +
+				// (_bundled_scripts_client_url ? '<script src="' + _bundled_scripts_client_url + '"></script>' : '') +
+				// '<script>' +
 					
 
-					(!_bundled_scripts_client_url ? _bundled_scripts_client + " " + render_id + "_init();" :
+				// 	// (!_bundled_scripts_client_url ? _bundled_scripts_client + " " + render_id + "_init();" :
 
-					"(function(c,r,a,z,y){y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
-					"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);") +
+				// 	// "(function(c,r,a,z,y){y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
+				// 	// "})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);") +
 
-					"function " + render_id + "_init(){" +
-						"c.store = new loki('crazy-taxi.db');" +
-						"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
-						"c.route.prefix('');c.route(document.getElementById('" + render_id + "'), '/', window['" + _bundle_id + "']);" +
-					"}" +
+				// 	"function " + render_id + "_init(){" +
+				// 		"window.global_styles = '" + _bundled_styles_client_url + "';" +
+				// 		"c.store = new loki('crazy-taxi.db');" +
+				// 		"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
+				// 		"c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
+				// 	"}" +
 
-				'</script></body>'
+				// '</script></body>'
 
-			return output_string
+			return $.html()
 		})
 		.catch(function(error){
 
