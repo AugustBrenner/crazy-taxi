@@ -212,18 +212,18 @@ var compile = (input) => {
 	}
 
 
-	// if(SETTINGS.get('production')){
+	if(SETTINGS.get('production')){
 		
-	// 	compiler.run(bundleFiles)
-	// }
+		compiler.run(bundleFiles)
+	}
 
-	// else {
+	else {
 		
-	// 	compiler.watch({ 
-	// 	    aggregateTimeout: 300,
-	// 	    // poll: true 
-	// 	}, bundleFiles)
-	// }
+		compiler.watch({ 
+		    aggregateTimeout: 300,
+		    // poll: true 
+		}, bundleFiles)
+	}
 
 
 	return (params, config) => {
