@@ -8,6 +8,7 @@ var StringReplacePlugin = require("string-replace-webpack-plugin")
 var ExtractTextPlugin 	= require('extract-text-webpack-plugin')
 var styleLoader 		= require('style-loader')
 var cssLoader 			= require('css-loader')
+var deasync 			= require('deasync')
 
 var render 				= require('mithril-node-render')
 var hyperscript 		= require('mithril/hyperscript')
@@ -201,11 +202,7 @@ var compile = (input) => {
 		}
 		catch(e){
 
-			var error_message = e.toString() + '\n'
-			if(e.stack) e.stack.forEach((callsite, index) => {
-				error_message += '  ' + callsite.getFileName() + ': ' + callsite.getLineNumber() + '\n'
-			})
-			console.error(error_message)
+			console.error(e)
 
 		}
 
@@ -233,33 +230,44 @@ var compile = (input) => {
 
 		var render_id = shortid.generate()
 
-		
 
-		return render(hyperscript(_compiled_files, params)).then(function(output){
+		try{
+			var output = ''
+			var done = false
 
-			var output_string = 
-				'<style>' + _bundled_styles + '</style>' +
-				'<div id="' + render_id + '" class="ct-root">' +
-					output +
-				'</div>' +
-				'<script>' +
-					(config.exclude_framework ? '' : _bundled_framework) +
-					_bundled_files + 
-					"m.mount(document.getElementById('" + render_id + "'), {view: function () { return m(window['" + _bundle_id + "'], " + JSON.stringify(params).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ")}})" +
-				'</script>'
-
-			return output_string
-		})
-		.catch(function(error){
-
-			var error_message = error.toString() + '\n'
-			if(error.stack) error.stack.forEach((callsite, index) => {
-				error_message += '  ' + callsite.getFileName() + ': ' + callsite.getLineNumber() + '\n'
+			render(hyperscript(_compiled_files, params)).then(function(out){
+				output = out
+				done = true
 			})
-			console.error(error_message)
+			.catch(function(error){
+				console.error(error)
+				done = true
+			})
+
+			deasync.loopWhile(function(){return !done})
+
+		}
+		catch(e){
+
+			console.error(e)
 
 			var output = ''
-		})
+		}
+
+		
+		var output_string = 
+			'<style>' + _bundled_styles + '</style>' +
+			'<div id="' + render_id + '" class="ct-root">' +
+				output +
+			'</div>' +
+			'<script>' +
+				(config.exclude_framework ? '' : _bundled_framework) +
+				_bundled_files + 
+				"m.mount(document.getElementById('" + render_id + "'), {view: function () { return m(window['" + _bundle_id + "'], " + JSON.stringify(params).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ")}})" +
+			'</script>'
+
+		return output_string
+
 	}
 }
 

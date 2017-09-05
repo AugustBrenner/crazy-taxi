@@ -31,6 +31,7 @@
     "babel-preset-env": "^1.6.0",
     "cheerio": "^1.0.0-rc.2",
     "css-loader": "^0.28.0",
+    "deasync": "^0.1.10",
     "expose-loader": "^0.7.3",
     "extract-text-webpack-plugin": "^2.1.0",
     "ignore-loader": "^0.1.2",
