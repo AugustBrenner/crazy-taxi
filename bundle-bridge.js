@@ -11,6 +11,8 @@ BundleBridge.oninit = function(vnode){
 	c.store = vnode.attrs.store
 	c.request = vnode.attrs.requestHandler.request
 	c.jsonp = vnode.attrs.requestHandler.jsonp
+	// c.styles = c.trust(vnode.attrs.styles)
+	// c.scripts = c.trust(vnode.attrs.scripts)
 }
 
 BundleBridge.view = function(vnode){

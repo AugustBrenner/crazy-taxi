@@ -27,6 +27,7 @@
     "aws-sdk": "^2.108.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "babel-preset-babili": "^0.1.4",
     "babel-preset-env": "^1.6.0",
     "cheerio": "^1.0.0-rc.2",
     "css-loader": "^0.28.0",

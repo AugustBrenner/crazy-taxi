@@ -1,8 +1,9 @@
 "use strict"
 
-var requestHandler = require('xhr-request')
+var requestHandler 		= require('xhr-request')
+var url 				= require('url')
 
-var buildQueryString = require("mithril/querystring/build")
+var buildQueryString 	= require("mithril/querystring/build")
 
 var FILE_PROTOCOL_REGEX = new RegExp("^file://", "i")
 
@@ -100,7 +101,12 @@ var RequestClosure = function(request_options){
 
 			if(!(/^https?:\/\/|^\/\//i).test(params.uri)){
 
-				request_options.base_url = request_options.base_url.replace(/\/$/, '')
+				// request_options.base_url = request_options.base_url.replace(/\/$/, '')
+
+				var url_obj = url.parse(request_options.base_url)
+
+				request_options.base_url = url_obj.protocol + '//' + url_obj.host
+
 				params.uri = params.uri.replace(/^\//, '')
 
 				params.uri = request_options.base_url + '/' + params.uri

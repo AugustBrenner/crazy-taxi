@@ -64,8 +64,6 @@ function _getCallerFile() {
 
 var router = function(relative_path) {
 
-	console.log('Initiated')
-
 	var config = {}
 
 	var _caller_dir_path = path.dirname(_getCallerFile())
@@ -329,8 +327,8 @@ var router = function(relative_path) {
 
 	  		if(SETTINGS.get('production') && config.s3){
 	  			
-	  			var base_64_data_scripts = new Buffer(_bundled_scripts_client, 'binary')
-	  			var content_length_scripts =  Buffer.byteLength(_bundled_scripts_client, 'binary')
+	  			var base_64_data_scripts = new Buffer(_bundled_scripts_client, 'utf8')
+	  			var content_length_scripts =  Buffer.byteLength(_bundled_scripts_client, 'utf8')
 
 				config.s3.putObject({
 					Bucket: config.s3_bucket_name,
@@ -352,8 +350,8 @@ var router = function(relative_path) {
 
 				if(_bundled_styles_client){
 
-					var base64dataStyles = new Buffer(_bundled_styles_client, 'binary')
-					var content_length_styles =  Buffer.byteLength(_bundled_styles_client, 'binary')
+					var base64dataStyles = new Buffer(_bundled_styles_client, 'utf8')
+					var content_length_styles =  Buffer.byteLength(_bundled_styles_client, 'utf8')
 
 					config.s3.putObject({
 						Bucket: config.s3_bucket_name,
@@ -396,6 +394,23 @@ var router = function(relative_path) {
 			store: store,
 			component: params.component,
 			requestHandler: params.requestHandler,
+			// scripts: "<script>" +
+
+			// 	"function " + render_id + "_init(){" +
+			// 		"c.scripts = c.trust('" + '<script id="' + render_id + '_scripts">\');' + 
+			// 		"c.styles = c.trust('"+'<link id="' + render_id + '_styles" rel="stylesheet" type="text/css" href="' + _bundled_styles_client_url + '">'+ "');" +
+			// 		"window.global_styles = '" + _bundled_styles_client_url + "';" +
+			// 		"c.store = new loki('crazy-taxi.db');" +
+			// 		"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
+			// 		"c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
+			// 	"}" +
+
+			// 	"(function(c,r,a,z,y){" +
+			// 		"y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
+			// 	"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);" + 
+
+			// "</script>",
+			// styles: '<link id="' + render_id + '_styles" rel="stylesheet" type="text/css" href="' + _bundled_styles_client_url + '">'
 		}).then(function(output){
 
 			var $ = cheerio.load(output)
