@@ -49,6 +49,7 @@
     "style-loader": "^0.16.1",
     "superagent": "^3.6.0",
     "webpack": "^2.7.0",
+    "webpack-append": "^0.1.2",
     "xhr-request": "^1.0.1",
     "xml2js": "^0.4.19"
   }

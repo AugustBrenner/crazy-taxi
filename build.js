@@ -145,12 +145,12 @@ var router = function(relative_path) {
 			      	}
 			    },
 				{
-					test: path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
+					test: /mithril\/mithril\.min\.js/,
 					loader: 'expose-loader?c'
 				},
 
 				{
-					test: path.resolve(__dirname, 'node_modules/lokijs'),
+					test: /lokijs/,
 					loader: 'expose-loader?loki'
 				},
 				{
@@ -168,12 +168,13 @@ var router = function(relative_path) {
 		resolveLoader: {
 			modules: [
 				path.resolve(__dirname, 'node_modules'),
+				'node_modules',
 			],
 		},
 		resolve: {
 			alias: {
-				'crazy-taxi': path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
-				'lokijs': path.resolve(__dirname, 'node_modules/lokijs'),
+				'crazy-taxi': 'mithril/mithril.min.js',
+				// 'lokijs': 'lokijs',
 			}
 		},
 		plugins: [
@@ -287,7 +288,8 @@ var router = function(relative_path) {
 		},
 		resolveLoader: {
 			modules: [
-				path.resolve(__dirname, 'node_modules')
+				path.resolve(__dirname, 'node_modules'),
+				'node_modules',
 			]
 		},
 		plugins: [
