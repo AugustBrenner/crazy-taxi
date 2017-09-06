@@ -23,8 +23,9 @@ function parsePath(path, queryData, hashData) {
 }
 
 
-function normalize(url_object, fragment) {
-	var data = url_object[fragment].replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
+function normalize(url_part, fragment) {
+
+	var data = url_part.replace(/(?:%[a-f89][a-f0-9])+/gim, decodeURIComponent)
 	if (fragment === "pathname" && data[0] !== "/") data = "/" + data
 	return data
 }
@@ -60,7 +61,7 @@ var Router = function(routes, callback){
 		
 		var url_object = url.parse(req.originalUrl)
 
-		var path = normalize(url_object, "pathname") + normalize(url_object, "search")
+		var path = normalize(url_object.pathname || '', "pathname") + normalize(url_object.search || '?', "search")
 
 		var params = {}
 		var pathname = parsePath(path, params, params)

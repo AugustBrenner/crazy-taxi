@@ -58,8 +58,9 @@ var Page2 = {
 
 const router 	= {
 
-	'/'			: Home,
+	'/'			              : Home,
 
+  '/page2'              : Page2,
 	'/page2/:param2...' 	: Page2,
 
 }
