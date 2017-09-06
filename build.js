@@ -12,7 +12,7 @@ var styleLoader 		= require('style-loader')
 var cssLoader 			= require('css-loader')
 var babelLoader 		= require('babel-loader')
 var requireFromString 	= require('require-from-string')
-var Router 				= require('router')
+var Router 				= require('./router.js')
 var url 				= require('url')
 var AWS 				= require('aws-sdk')
 var loki 				= require('lokijs')
@@ -85,7 +85,7 @@ var router = function(relative_path) {
 
 	var _bundled_styles_client_url = ''
 
-	var _server_router = Router()
+	var _server_router = Router({})
 
 	var _source_maps = ''
 
@@ -428,6 +428,7 @@ var router = function(relative_path) {
 			store: store,
 			component: params.component,
 			requestHandler: params.requestHandler,
+			params: params.params,
 			// scripts: "<script>" +
 
 			// 	"function " + render_id + "_init(){" +
@@ -548,31 +549,30 @@ var router = function(relative_path) {
 
 	  		_compiled_files = requireFromString(_bundled_scripts_server)
 
-	  		_server_router = Router()
+	  		_server_router = Router(_compiled_files.routes, function(component, params, req, res, next){
 
-	  		Object.keys(_compiled_files.routes).forEach(function(key){
+	  			if(!component) return res.sendStatus(404)
 
-	  			_server_router.get(key, function(req, res) {
+				var base_url = url.format({
+				    protocol: req.protocol,
+				    host: req.get('host'),
+				    pathname: req.originalUrl
+				})
 
-					var base_url = url.format({
-					    protocol: req.protocol,
-					    host: req.get('host'),
-					    pathname: req.originalUrl
-					})
-
-	  				render({
-	  					shim:_compiled_files.shim,
-	  					component: _compiled_files.routes[key],
-	  					requestHandler: Request({
-	  						headers: req.headers,
-	  						base_url: base_url,
-	  					}),
-	  				})
-	  				.then(function(result){
-	  					res.send(result)
-	  				})
-	  			})
+  				render({
+  					shim:_compiled_files.shim,
+  					component: component,
+  					requestHandler: Request({
+  						headers: req.headers,
+  						base_url: base_url,
+  					}),
+  					params: params,
+  				})
+  				.then(function(result){
+  					res.send(result)
+  				})
 	  		})
+
 
 		}
 		catch(error){

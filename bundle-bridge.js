@@ -16,7 +16,8 @@ BundleBridge.oninit = function(vnode){
 }
 
 BundleBridge.view = function(vnode){
-	return c(vnode.attrs.component)
+	
+	return c(vnode.attrs.component, vnode.attrs.params)
 }
 
 module.exports = {

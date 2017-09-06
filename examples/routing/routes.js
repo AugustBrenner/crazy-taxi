@@ -44,6 +44,7 @@ var Page2 = {
         	c('body', [
         		c('a', {href:'/', oncreate: c.route.link}, 'Home'),
             c('svg', c('use', {'xlink:href': '#icon-like'})),
+            c('pre', JSON.stringify(vnode.attrs, null, 4)),
             c.svgs
         	]),
         ]
@@ -59,7 +60,7 @@ const router 	= {
 
 	'/'			: Home,
 
-	'/page2' 	: Page2,
+	'/page2/:param2...' 	: Page2,
 
 }
 
