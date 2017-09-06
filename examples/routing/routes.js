@@ -1,5 +1,7 @@
 const c 		= require('crazy-taxi')
 
+import symbol from './like.svg'
+
 
 
 
@@ -41,6 +43,8 @@ var Page2 = {
         	]),
         	c('body', [
         		c('a', {href:'/', oncreate: c.route.link}, 'Home'),
+            c('svg', c('use', {'xlink:href': '#icon-like'})),
+            c.svgs
         	]),
         ]
     }

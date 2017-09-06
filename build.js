@@ -7,6 +7,7 @@ var path 				= require('path')
 var fs 		 			= require('fs')
 var StringReplacePlugin = require("string-replace-webpack-plugin")
 var ExtractTextPlugin 	= require('extract-text-webpack-plugin')
+var SpriteLoaderPlugin 	= require('svg-sprite-loader/plugin')
 var styleLoader 		= require('style-loader')
 var cssLoader 			= require('css-loader')
 var babelLoader 		= require('babel-loader')
@@ -23,7 +24,7 @@ var Request 			= require('./request.js')
 
 var SETTINGS 			= require('./settings.js')
 
-SETTINGS.set('production', true)
+// SETTINGS.set('production', true)
 
 
 shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_')
@@ -73,6 +74,8 @@ var router = function(relative_path) {
 	var _compiled_files = {view: function(){}}
 	
 	var _bundled_scripts_server = ''
+
+	var _bundled_svg_server = ''
 
 	var _bundled_scripts_client = ''
 
@@ -144,6 +147,19 @@ var router = function(relative_path) {
       					}
 			      	}
 			    },
+			    {
+		        	test: /\.svg$/,
+		        	loader: 'ignore-loader',
+		        },
+				// {
+				// 	test: path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
+				// 	loader: 'expose-loader?c'
+				// },
+
+				// {
+				// 	test: path.resolve(__dirname, 'node_modules/lokijs'),
+				// 	loader: 'expose-loader?loki'
+				// },
 				{
 					test: /mithril\/mithril\.min\.js/,
 					loader: 'expose-loader?c'
@@ -174,7 +190,8 @@ var router = function(relative_path) {
 		resolve: {
 			alias: {
 				'crazy-taxi': 'mithril/mithril.min.js',
-				// 'lokijs': 'lokijs',
+				// 'crazy-taxi': path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
+				// 'lokijs': path.resolve(__dirname, 'node_modules/lokijs'),
 			}
 		},
 		plugins: [
@@ -245,6 +262,20 @@ var router = function(relative_path) {
 		        	test: /\.css$/,
 		        	loader: 'ignore-loader',
 		        },
+		        {
+					test: /\.svg$/,
+					use: [
+						{
+							loader: 'svg-sprite-loader',
+							options: {
+								symbolId: 'icon-[name]',
+								extract: true,
+								spriteFilename: 'bundle_server.svg'
+							}
+						},
+						'svgo-loader'
+					]
+				},
 		        { 
 		            test: /\.js$/,
 		            include: [
@@ -294,6 +325,7 @@ var router = function(relative_path) {
 		},
 		plugins: [
 	      	new StringReplacePlugin(),
+	      	new SpriteLoaderPlugin(),
 		],
 	   	devtool: 'cheap-eval-source-map'
 	}
@@ -430,6 +462,7 @@ var router = function(relative_path) {
 				"function " + render_id + "_init(){" +
 					"c.styles = c.trust(document.getElementById('" + render_id + "_styles').outerHTML);" + 
 					"c.scripts = c.trust(document.getElementById('" + render_id + "_scripts').outerHTML);" +
+					"c.svgs = c.trust('" + _bundled_svg_server.replace(/\n/g, '') + "');" +
 					"window.global_styles = '" + _bundled_styles_client_url + "';" +
 					"c.store = new loki('crazy-taxi.db');" +
 					"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
@@ -445,6 +478,10 @@ var router = function(relative_path) {
 					"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);" + 
 				"</script>")
 			}
+
+			// if(_bundled_svg_server){
+			// 	console.log(_bundled_svg_server)
+			// }
 
 			else {
 				$('body').append('<script id="' + render_id + '_scripts">' + _bundled_scripts_client + ' ' + render_id + '_init();</script>')
@@ -506,6 +543,8 @@ var router = function(relative_path) {
 
 
 	  		_bundled_scripts_server = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_server.js'), 'utf8')
+
+	  		if(Object.keys(stats.compilation.assets).indexOf('bundle_server.svg') > -1) _bundled_svg_server = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_server.svg'), 'utf8')
 
 	  		_compiled_files = requireFromString(_bundled_scripts_server)
 
