@@ -23,7 +23,7 @@ var Request 			= require('./request.js')
 
 var SETTINGS 			= require('./settings.js')
 
-// SETTINGS.set('production', true)
+SETTINGS.set('production', true)
 
 
 shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_')

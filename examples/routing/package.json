@@ -1,0 +1,16 @@
+{
+  "name": "crazy-taxi-easy",
+  "version": "0.0.1",
+  "description": "A simple example of crazy taxi",
+  "main": "server.js",
+  "dependencies": {
+    "crazy-taxi": "*",
+    "express": "^4.14.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "MIT"
+}

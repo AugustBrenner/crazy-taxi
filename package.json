@@ -1,6 +1,6 @@
 {
   "name": "crazy-taxi",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "A wrapper around mithril that utilizes mithril-node-render and webpack to render mithril templates server side along with their bundle so that they function seamlessly on the client.",
   "main": "index.js",
   "scripts": {
@@ -23,11 +23,9 @@
   },
   "homepage": "https://github.com/AugustBrenner/crazy-taxi#readme",
   "dependencies": {
-    "assets-webpack-plugin": "^3.5.1",
     "aws-sdk": "^2.108.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
-    "babel-preset-babili": "^0.1.4",
     "babel-preset-env": "^1.6.0",
     "cheerio": "^1.0.0-rc.2",
     "css-loader": "^0.28.0",
@@ -39,18 +37,13 @@
     "memory-fs": "^0.3.0",
     "mithril": "1.1.1",
     "mithril-node-render": "2.0.2",
-    "needle": "^2.0.0",
-    "postcss-loader": "^1.3.3",
     "require-from-string": "^1.2.1",
     "router": "^1.3.1",
     "shortid": "^2.2.6",
-    "string-hash": "^1.1.3",
     "string-replace-webpack-plugin": "^0.1.3",
     "style-loader": "^0.16.1",
-    "superagent": "^3.6.0",
-    "webpack": "^2.7.0",
+    "webpack": "^2.3.3",
     "webpack-append": "^0.1.2",
     "xhr-request": "^1.0.1",
-    "xml2js": "^0.4.19"
   }
 }
