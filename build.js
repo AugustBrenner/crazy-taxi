@@ -85,7 +85,7 @@ var router = function(relative_path) {
 
 	var _bundled_styles_client_url = ''
 
-	var _server_router = Router({})
+	var _server_router = Router({}, function(){})
 
 	var _source_maps = ''
 
