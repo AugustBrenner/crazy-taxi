@@ -465,11 +465,11 @@ var router = function(relative_path) {
 					"var styles = document.getElementById('" + render_id + "_styles');" +
 
 					"if(styles.tagName.toUpperCase() === 'LINK'){" +
-						"styles = c('link', {id:styles.id, rel:'stylesheet', type:'text/css', href:styles.href})" + 
+						"styles = c('link', {key: styles.id, id:styles.id, rel:'stylesheet', type:'text/css', href:styles.href})" + 
 					"}" +
 
 					"else{" +
-						"styles = c('style', {}, styles.innerHTML)" + 
+						"styles = c('style', {key: styles.id}, styles.innerHTML)" + 
 					"};" +
 
 					// "var scripts = document.getElementById('" + render_id + "_scripts');" +
