@@ -1,6 +1,7 @@
 'use strict'
 
 
+var c 				 = require("mithril/hyperscript")
 var buildQueryString = require("mithril/querystring/build")
 var parseQueryString = require("mithril/querystring/parse")
 var url 			 = require("url")
@@ -51,6 +52,24 @@ var Router = function(routes, callback){
 				})
 				break
 			}
+		}
+
+		if(!results.component){
+
+			results.component = {view: function(){ return c('p', 'Loading...')}}
+			
+			results.params = {}
+
+			return results
+		}
+
+		if(results.component.view) return results
+
+		if (results.component.onmatch) {
+
+			results.component = results.component.onmatch(results.params, pathname)
+
+			return results
 		}
 
 		return results

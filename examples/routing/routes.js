@@ -40,12 +40,12 @@ var Home = {
 	view: function(vnode) {
 		return [
 			c('head', [
-				c('title', 'Home'),
 				c.styles,
+				c('title', 'Home'),
 			]),
 			c('body', [
 				c('a', {href:'/page2', oncreate: c.route.link}, 'Page 2'),
-				c('pre', JSON.stringify(vnode.state.greetings, null, 4))
+				c('pre', JSON.stringify(vnode.state.greetings, null, 4)),
 			]),
 		]
 	}
@@ -71,7 +71,8 @@ var Page2 = {
 	view: function(vnode) {
 		return [
 			c('head', [
-				c('title', 'Page 2')
+				c('title', 'Page 2'),
+				c.styles,
 			]),
 			c('body', [
 				c('a', {href:'/', oncreate: c.route.link}, 'Home'),

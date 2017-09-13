@@ -461,8 +461,29 @@ var router = function(relative_path) {
 			$('body').append('<script>' +
 
 				"function " + render_id + "_init(){" +
-					"c.styles = c.trust(document.getElementById('" + render_id + "_styles').outerHTML);" + 
-					"c.scripts = c.trust(document.getElementById('" + render_id + "_scripts').outerHTML);" +
+
+					"var styles = document.getElementById('" + render_id + "_styles');" +
+
+					"if(styles.tagName.toUpperCase() === 'LINK'){" +
+						"styles = c('link', {id:styles.id, rel:'stylesheet', type:'text/css', href:styles.href})" + 
+					"}" +
+
+					"else{" +
+						"styles = c('style', {}, styles.innerHTML)" + 
+					"};" +
+
+					// "var scripts = document.getElementById('" + render_id + "_scripts');" +
+
+					// "if(scripts.src){" +
+					// 	"scripts = c('script', {key: '" + render_id + "-styles', src:scripts.src})" + 
+					// "}" +
+
+					// "else{" +
+					// 	"scripts = c('script', {key: '" + render_id + "-styles'}, scripts.innerHTML)" + 
+					// "};" +
+
+					"c.styles = styles;" + 
+					// "c.scripts = scripts;" +
 					"c.svgs = c.trust('" + _bundled_svg_server.replace(/\n/g, '') + "');" +
 					"window.global_styles = '" + _bundled_styles_client_url + "';" +
 					"c.store = new loki('crazy-taxi.db');" +
