@@ -450,7 +450,6 @@ var router = function(relative_path) {
 
 			var $ = cheerio.load(output)
 
-
 			if(_bundled_styles_client_url){
 				$('head').append('<link id="' + render_id + '_styles" rel="stylesheet" type="text/css" href="' + _bundled_styles_client_url + '">')
 			}
@@ -484,7 +483,7 @@ var router = function(relative_path) {
 
 					"c.styles = styles;" + 
 					// "c.scripts = scripts;" +
-					"c.svgs = c.trust('" + _bundled_svg_server.replace(/\n/g, '') + "');" +
+					"c.svgs = c.trust('" + _bundled_svg_server + "');" +
 					"window.global_styles = '" + _bundled_styles_client_url + "';" +
 					"c.store = new loki('crazy-taxi.db');" +
 					"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
@@ -567,6 +566,11 @@ var router = function(relative_path) {
 	  		_bundled_scripts_server = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_server.js'), 'utf8')
 
 	  		if(Object.keys(stats.compilation.assets).indexOf('bundle_server.svg') > -1) _bundled_svg_server = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_server.svg'), 'utf8')
+
+	  		if(_bundled_svg_server){
+
+	  			_bundled_svg_server = (_bundled_svg_server.slice(0, 4) + ' style="display: none !important;"' + _bundled_svg_server.slice(4)).replace(/\n/g, '')
+	  		}
 
 	  		_compiled_files = requireFromString(_bundled_scripts_server)
 
