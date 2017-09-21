@@ -457,7 +457,19 @@ var router = function(relative_path) {
 				$('head').append('<style id="' + render_id + '_styles">' + _bundled_styles_client + '</style>')
 			}
 
-			$('body').append('<script>' +
+			if(_bundled_scripts_client_url){
+				$('body').prepend('<script id="' + render_id + '_scripts">' + 
+					"(function(c,r,a,z,y){" +
+						"y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
+					"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);" + 
+				"</script>")
+			}
+
+			else {
+				$('body').prepend('<script id="' + render_id + '_scripts">' + _bundled_scripts_client + ' ' + render_id + '_init();</script>')
+			}
+
+			$('body').prepend('<script>' +
 
 				"function " + render_id + "_init(){" +
 
@@ -492,21 +504,6 @@ var router = function(relative_path) {
 
 			'</script>')
 
-			if(_bundled_scripts_client_url){
-				$('body').append('<script id="' + render_id + '_scripts">' + 
-					"(function(c,r,a,z,y){" +
-						"y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
-					"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);" + 
-				"</script>")
-			}
-
-			// if(_bundled_svg_server){
-			// 	console.log(_bundled_svg_server)
-			// }
-
-			else {
-				$('body').append('<script id="' + render_id + '_scripts">' + _bundled_scripts_client + ' ' + render_id + '_init();</script>')
-			}
 
 
 			// var output_string = 
