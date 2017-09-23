@@ -370,7 +370,7 @@ var router = function(relative_path) {
 	  			_bundled_styles_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.css'), 'utf8')
 
 	  			_bundled_scripts_client += '(function(){'+
-	  				'c.styles = c("style",{key:"styles"},' + JSON.stringify(_bundled_styles_client) + ');' +
+	  				'c.styles = c("style",{key:"styles"},' + JSON.stringify(_bundled_styles_client).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ');' +
 	  			'})();'
 	  		}
 	  		
@@ -381,7 +381,7 @@ var router = function(relative_path) {
 	  			_bundled_svg_client = (_bundled_svg_client.slice(0, 4) + ' style="display: none !important;"' + _bundled_svg_client.slice(4)).replace(/\n/g, '')
 
 	  			_bundled_scripts_client += '(function(){'+
-	  				"c.svgs = c.trust(" + JSON.stringify(_bundled_svg_client) + ");" +
+	  				"c.svgs = c.trust(" + JSON.stringify(_bundled_svg_client).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
 	  			'})();'
 	  		}
 
