@@ -75,9 +75,9 @@ var router = function(relative_path) {
 	
 	var _bundled_scripts_server = ''
 
-	var _bundled_svg_server = ''
-
 	var _bundled_scripts_client = ''
+
+	var _bundled_svg_client = ''
 
 	var _bundled_scripts_client_url = ''
 
@@ -121,7 +121,13 @@ var router = function(relative_path) {
 		        	test: /\.css$/,
 		        	use: ExtractTextPlugin.extract({
 		              	fallback: 'style-loader',
-		              	use: [ 'css-loader' ]
+		              	use: {
+					      	loader: "css-loader",
+					      	options: {
+					      		minimize: true,
+					      		sourceMap: !SETTINGS.get('production'),
+					      	}
+					    },
 		          	})
 		        },
 				{ 
@@ -147,10 +153,20 @@ var router = function(relative_path) {
       					}
 			      	}
 			    },
-			    {
-		        	test: /\.svg$/,
-		        	loader: 'ignore-loader',
-		        },
+		        {
+					test: /\.svg$/,
+					use: [
+						{
+							loader: 'svg-sprite-loader',
+							options: {
+								symbolId: 'icon-[name]',
+								extract: true,
+								spriteFilename: 'bundle_client.svg'
+							}
+						},
+						'svgo-loader'
+					]
+				},
 				// {
 				// 	test: path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
 				// 	loader: 'expose-loader?c'
@@ -201,7 +217,10 @@ var router = function(relative_path) {
 	      	new ExtractTextPlugin({
 	          	filename: 'bundle_client.css'
 	        }),
-	   	]
+
+	        new SpriteLoaderPlugin(),
+	   	],
+	   	devtool: SETTINGS.get('production') ? false : 'cheap-eval-source-map'
 	}
 
 	if(SETTINGS.get('production')){
@@ -263,19 +282,9 @@ var router = function(relative_path) {
 		        	loader: 'ignore-loader',
 		        },
 		        {
-					test: /\.svg$/,
-					use: [
-						{
-							loader: 'svg-sprite-loader',
-							options: {
-								symbolId: 'icon-[name]',
-								extract: true,
-								spriteFilename: 'bundle_server.svg'
-							}
-						},
-						'svgo-loader'
-					]
-				},
+		        	test: /\.svg$/,
+		        	loader: 'ignore-loader',
+		        },
 		        { 
 		            test: /\.js$/,
 		            include: [
@@ -325,7 +334,6 @@ var router = function(relative_path) {
 		},
 		plugins: [
 	      	new StringReplacePlugin(),
-	      	new SpriteLoaderPlugin(),
 		],
 	   	devtool: 'cheap-eval-source-map'
 	}
@@ -356,8 +364,29 @@ var router = function(relative_path) {
 
 			// console.log(path.resolve(_caller_dir_path, 'bundle.js'))
 	  		_bundled_scripts_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.js'), 'utf8')
-	  		if(Object.keys(stats.compilation.assets).indexOf('bundle_client.css') > -1) _bundled_styles_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.css'), 'utf8')
+
+	  		if(Object.keys(stats.compilation.assets).indexOf('bundle_client.css') > -1){
+
+	  			_bundled_styles_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.css'), 'utf8')
+
+	  			_bundled_scripts_client += '(function(){'+
+	  				'c.styles = c("style",{key:"styles"},' + JSON.stringify(_bundled_styles_client) + ');' +
+	  			'})();'
+	  		}
+	  		
+	  		if(Object.keys(stats.compilation.assets).indexOf('bundle_client.svg') > -1){
+
+	  			_bundled_svg_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.svg'), 'utf8')
+
+	  			_bundled_svg_client = (_bundled_svg_client.slice(0, 4) + ' style="display: none !important;"' + _bundled_svg_client.slice(4)).replace(/\n/g, '')
+
+	  			_bundled_scripts_client += '(function(){'+
+	  				"c.svgs = c.trust(" + JSON.stringify(_bundled_svg_client) + ");" +
+	  			'})();'
+	  		}
+
 	  		// _source_maps = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js.map'), 'utf8')
+
 
 	  		if(SETTINGS.get('production') && config.s3){
 	  			
@@ -382,28 +411,28 @@ var router = function(relative_path) {
 
 				})
 
-				if(_bundled_styles_client){
+				// if(_bundled_styles_client){
 
-					var base64dataStyles = new Buffer(_bundled_styles_client, 'utf8')
-					var content_length_styles =  Buffer.byteLength(_bundled_styles_client, 'utf8')
+				// 	var base64dataStyles = new Buffer(_bundled_styles_client, 'utf8')
+				// 	var content_length_styles =  Buffer.byteLength(_bundled_styles_client, 'utf8')
 
-					config.s3.putObject({
-						Bucket: config.s3_bucket_name,
-						Key: config.s3_bucket_directories + '/' + stats.hash + '.bundle.css',
-						Body: base64dataStyles,
-						ACL: 'public-read',
-						CacheControl: 'public, max-age=31536000',
-						ContentLength: content_length_styles,
-						ContentType: 'text/css; charset=utf-8',
-					}, function (error, response) {
+				// 	config.s3.putObject({
+				// 		Bucket: config.s3_bucket_name,
+				// 		Key: config.s3_bucket_directories + '/' + stats.hash + '.bundle.css',
+				// 		Body: base64dataStyles,
+				// 		ACL: 'public-read',
+				// 		CacheControl: 'public, max-age=31536000',
+				// 		ContentLength: content_length_styles,
+				// 		ContentType: 'text/css; charset=utf-8',
+				// 	}, function (error, response) {
 
-						if(error) return console.error('Failed to upload client styles. Falling back to inline styles.')
+				// 		if(error) return console.error('Failed to upload client styles. Falling back to inline styles.')
 
-						console.log('Successfully uploaded client styles')
+				// 		console.log('Successfully uploaded client styles')
 
-						_bundled_styles_client_url = config.cdn_url.replace(/\/$/, '') + '/' + stats.hash + '.bundle.css'
-					})
-				}
+				// 		_bundled_styles_client_url = config.cdn_url.replace(/\/$/, '') + '/' + stats.hash + '.bundle.css'
+				// 	})
+				// }
 	  		}
 
 		}
@@ -450,60 +479,67 @@ var router = function(relative_path) {
 
 			var $ = cheerio.load(output)
 
-			if(_bundled_styles_client_url){
-				$('head').append('<link id="' + render_id + '_styles" rel="stylesheet" type="text/css" href="' + _bundled_styles_client_url + '">')
-			}
-			else {
-				$('head').append('<style id="' + render_id + '_styles">' + _bundled_styles_client + '</style>')
-			}
+			// if(_bundled_styles_client_url){
+			// 	$('head').append('<link id="' + render_id + '_styles" rel="stylesheet" type="text/css" href="' + _bundled_styles_client_url + '">')
+			// }
+			// else {
+			// 	$('head').append('<style id="' + render_id + '_styles">' + _bundled_styles_client + '</style>')
+			// }
 
-			if(_bundled_scripts_client_url){
-				$('body').prepend('<script id="' + render_id + '_scripts">' + 
-					"(function(c,r,a,z,y){" +
-						"y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
-					"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);" + 
-				"</script>")
-			}
-
-			else {
-				$('body').prepend('<script id="' + render_id + '_scripts">' + _bundled_scripts_client + ' ' + render_id + '_init();</script>')
-			}
 
 			$('body').prepend('<script>' +
 
-				"function " + render_id + "_init(){" +
+				// "function " + render_id + "_init(){" +
 
-					"var styles = document.getElementById('" + render_id + "_styles');" +
+				// 	// "var styles = document.getElementById('" + render_id + "_styles');" +
 
-					"if(styles.tagName.toUpperCase() === 'LINK'){" +
-						"styles = c('link', {key: styles.id, id:styles.id, rel:'stylesheet', type:'text/css', href:styles.href})" + 
-					"}" +
+				// 	// "if(styles.tagName.toUpperCase() === 'LINK'){" +
+				// 	// 	"styles = c('link', {key: styles.id, id:styles.id, rel:'stylesheet', type:'text/css', href:styles.href})" + 
+				// 	// "}" +
 
-					"else{" +
-						"styles = c('style', {key: styles.id}, styles.innerHTML)" + 
-					"};" +
+				// 	// "else{" +
+				// 	// 	"styles = c('style', {key: styles.id}, styles.innerHTML)" + 
+				// 	// "};" +
 
-					// "var scripts = document.getElementById('" + render_id + "_scripts');" +
+				// 	// "var scripts = document.getElementById('" + render_id + "_scripts');" +
 
-					// "if(scripts.src){" +
-					// 	"scripts = c('script', {key: '" + render_id + "-styles', src:scripts.src})" + 
-					// "}" +
+				// 	// "if(scripts.src){" +
+				// 	// 	"scripts = c('script', {key: '" + render_id + "-styles', src:scripts.src})" + 
+				// 	// "}" +
 
-					// "else{" +
-					// 	"scripts = c('script', {key: '" + render_id + "-styles'}, scripts.innerHTML)" + 
-					// "};" +
+				// 	// "else{" +
+				// 	// 	"scripts = c('script', {key: '" + render_id + "-styles'}, scripts.innerHTML)" + 
+				// 	// "};" +
 
-					"c.styles = styles;" + 
-					// "c.scripts = scripts;" +
-					"c.svgs = c.trust('" + _bundled_svg_server + "');" +
-					"window.global_styles = '" + _bundled_styles_client_url + "';" +
-					"c.store = new loki('crazy-taxi.db');" +
-					"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
-					"c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
-				"}" +
+				// 	// "c.styles = styles;" + 
+				// 	// "c.scripts = scripts;" +
+				// 	// "c.svgs = c.trust('" + _bundled_svg_client + "');" +
+				// 	// "window.global_styles = '" + _bundled_styles_client_url + "';" +
+				// 	"c.store = new loki('crazy-taxi.db');" +
+				// 	"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
+				// 	"c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
+				// "}" +
+
+				"c.store = new loki('crazy-taxi.db');" +
+				"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
+				"c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
 
 			'</script>')
 
+			if(_bundled_scripts_client_url){
+				// $('body').prepend('<script id="' + render_id + '_scripts">' + 
+				// 	"(function(c,r,a,z,y){" +
+				// 		"y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
+				// 	"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);" + 
+				// "</script>")
+				$('body').prepend('<script id="' + render_id + '_scripts" src="'+ _bundled_scripts_client_url +'"></script>')
+			}
+
+			else {
+				// $('body').prepend('<script id="' + render_id + '_scripts">' + _bundled_scripts_client + ' ' + render_id + '_init();</script>')
+				$('body').prepend('<script id="' + render_id + '_scripts">' + _bundled_scripts_client +'</script>')
+
+			}
 
 
 			// var output_string = 
@@ -561,13 +597,6 @@ var router = function(relative_path) {
 
 
 	  		_bundled_scripts_server = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_server.js'), 'utf8')
-
-	  		if(Object.keys(stats.compilation.assets).indexOf('bundle_server.svg') > -1) _bundled_svg_server = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_server.svg'), 'utf8')
-
-	  		if(_bundled_svg_server){
-
-	  			_bundled_svg_server = (_bundled_svg_server.slice(0, 4) + ' style="display: none !important;"' + _bundled_svg_server.slice(4)).replace(/\n/g, '')
-	  		}
 
 	  		_compiled_files = requireFromString(_bundled_scripts_server)
 
