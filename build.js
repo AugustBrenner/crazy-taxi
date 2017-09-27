@@ -335,7 +335,7 @@ var router = function(relative_path) {
 		plugins: [
 	      	new StringReplacePlugin(),
 		],
-	   	devtool: 'cheap-eval-source-map'
+	   	devtool: 'inline-source-map'
 	}
 
 
