@@ -177,7 +177,7 @@ var router = function(relative_path) {
 				// 	loader: 'expose-loader?loki'
 				// },
 				{
-					test: /mithril\/mithril\.min\.js/,
+					test: /mithril\/index\.js/,
 					loader: 'expose-loader?c'
 				},
 
@@ -205,7 +205,7 @@ var router = function(relative_path) {
 		},
 		resolve: {
 			alias: {
-				'crazy-taxi': 'mithril/mithril.min.js',
+				'crazy-taxi': 'mithril/index.js',
 				// 'crazy-taxi': path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
 				// 'lokijs': path.resolve(__dirname, 'node_modules/lokijs'),
 			}
@@ -335,7 +335,7 @@ var router = function(relative_path) {
 		plugins: [
 	      	new StringReplacePlugin(),
 		],
-	   	devtool: 'inline-source-map'
+	   	devtool: 'cheap-eval-source-map'
 	}
 
 
@@ -369,20 +369,20 @@ var router = function(relative_path) {
 
 	  			_bundled_styles_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.css'), 'utf8')
 
-	  			_bundled_scripts_client += '(function(){'+
-	  				'c.styles = c("style",{key:"styles"},' + JSON.stringify(_bundled_styles_client).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ');' +
-	  			'})();'
+	  			// _bundled_scripts_client += '(function(){'+
+	  			// 	'c.styles = c("style",{key:"styles"},' + JSON.stringify(_bundled_styles_client).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ');' +
+	  			// '})();'
 	  		}
 	  		
 	  		if(Object.keys(stats.compilation.assets).indexOf('bundle_client.svg') > -1){
 
 	  			_bundled_svg_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.svg'), 'utf8')
 
-	  			_bundled_svg_client = (_bundled_svg_client.slice(0, 4) + ' style="display: none !important;"' + _bundled_svg_client.slice(4)).replace(/\n/g, '')
+	  			// _bundled_svg_client = (_bundled_svg_client.slice(0, 4) + ' style="display: none !important;"' + _bundled_svg_client.slice(4)).replace(/\n/g, '')
 
-	  			_bundled_scripts_client += '(function(){'+
-	  				"c.svgs = c.trust(" + JSON.stringify(_bundled_svg_client).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
-	  			'})();'
+	  			// _bundled_scripts_client += '(function(){'+
+	  			// 	"c.svgs = c.trust(" + JSON.stringify(_bundled_svg_client).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
+	  			// '})();'
 	  		}
 
 	  		// _source_maps = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js.map'), 'utf8')
@@ -449,6 +449,7 @@ var router = function(relative_path) {
 
 	var render = function(params) {
 
+
 		var render_id = shortid.generate()
 
 		var store = new loki("crazy-taxi.db")
@@ -476,71 +477,142 @@ var router = function(relative_path) {
 			// "</script>",
 			// styles: '<link id="' + render_id + '_styles" rel="stylesheet" type="text/css" href="' + _bundled_styles_client_url + '">'
 		}).then(function(output){
-
-			var $ = cheerio.load(output)
+			// var $ = cheerio.load(output)
 
 			// if(_bundled_styles_client_url){
 			// 	$('head').append('<link id="' + render_id + '_styles" rel="stylesheet" type="text/css" href="' + _bundled_styles_client_url + '">')
 			// }
 			// else {
-			// 	$('head').append('<style id="' + render_id + '_styles">' + _bundled_styles_client + '</style>')
+				// $('head').append('<style id="' + render_id + '_styles">' + _bundled_styles_client + '</style>')
 			// }
 
 
-			$('body').prepend('<script>' +
+			output = '<!doctype html>' +
+			'<html><head>' + '<style id="' + render_id + '_styles">' + _bundled_styles_client + '</style>' + output.slice(6, -7) +
 
-				// "function " + render_id + "_init(){" +
+				(_bundled_svg_client.slice(0, 4) + ' style="display: none !important;" id="' + render_id + '_svgs">' + _bundled_svg_client.slice(4)).replace(/\n/g, '') + 
 
-				// 	// "var styles = document.getElementById('" + render_id + "_styles');" +
+				'<script>' +
 
-				// 	// "if(styles.tagName.toUpperCase() === 'LINK'){" +
-				// 	// 	"styles = c('link', {key: styles.id, id:styles.id, rel:'stylesheet', type:'text/css', href:styles.href})" + 
-				// 	// "}" +
+				"function " + render_id + "_init(){" +
 
-				// 	// "else{" +
-				// 	// 	"styles = c('style', {key: styles.id}, styles.innerHTML)" + 
-				// 	// "};" +
+					"var styles = document.getElementById('" + render_id + "_styles');" +
+					"var svgs = document.getElementById('" + render_id + "_svgs');" +
 
-				// 	// "var scripts = document.getElementById('" + render_id + "_scripts');" +
+					// "if(styles.tagName.toUpperCase() === 'LINK'){" +
+					// 	"styles = c('link', {key: styles.id, id:styles.id, rel:'stylesheet', type:'text/css', href:styles.href})" + 
+					// "}" +
 
-				// 	// "if(scripts.src){" +
-				// 	// 	"scripts = c('script', {key: '" + render_id + "-styles', src:scripts.src})" + 
-				// 	// "}" +
+					// "else{" +
+						"styles = c('style', {key: styles.id}, styles.innerHTML);" + 
+					// "};" +
 
-				// 	// "else{" +
-				// 	// 	"scripts = c('script', {key: '" + render_id + "-styles'}, scripts.innerHTML)" + 
-				// 	// "};" +
+					// "var scripts = document.getElementById('" + render_id + "_scripts');" +
 
-				// 	// "c.styles = styles;" + 
-				// 	// "c.scripts = scripts;" +
-				// 	// "c.svgs = c.trust('" + _bundled_svg_client + "');" +
-				// 	// "window.global_styles = '" + _bundled_styles_client_url + "';" +
-				// 	"c.store = new loki('crazy-taxi.db');" +
-				// 	"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
-				// 	"c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
-				// "}" +
+					// "if(scripts.src){" +
+					// 	"scripts = c('script', {key: '" + render_id + "-styles', src:scripts.src})" + 
+					// "}" +
 
-				"c.store = new loki('crazy-taxi.db');" +
-				"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
-				"c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
+					// "else{" +
+					// 	"scripts = c('script', {key: '" + render_id + "-styles'}, scripts.innerHTML)" + 
+					// "};" +
 
-			'</script>')
+					"c.styles = styles;" + 
+					// "c.scripts = scripts;" +
+					// "c.svgs = c.trust('" + _bundled_svg_client + "');" +
+					"c.svgs = c.trust(svgs.outerHTML);" + 
+					"window.global_styles = '" + _bundled_styles_client_url + "';" +
+					"c.store = new loki('crazy-taxi.db');" +
+					"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
+					"c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
+				"}" +
 
-			if(_bundled_scripts_client_url){
-				// $('body').prepend('<script id="' + render_id + '_scripts">' + 
-				// 	"(function(c,r,a,z,y){" +
-				// 		"y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
-				// 	"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);" + 
-				// "</script>")
-				$('body').prepend('<script id="' + render_id + '_scripts" src="'+ _bundled_scripts_client_url +'"></script>')
-			}
+				// "c.store = new loki('crazy-taxi.db');" +
+				// "c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
+				// "c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
 
-			else {
-				// $('body').prepend('<script id="' + render_id + '_scripts">' + _bundled_scripts_client + ' ' + render_id + '_init();</script>')
-				$('body').prepend('<script id="' + render_id + '_scripts">' + _bundled_scripts_client +'</script>')
+			'</script>' +
 
-			}
+			(_bundled_scripts_client_url ? 
+				('<script id="' + render_id + '_scripts">' + 
+					"(function(c,r,a,z,y){" +
+						"y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
+					"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);" + 
+				"</script>")
+			:
+				'<script id="' + render_id + '_scripts">' + _bundled_scripts_client + ' ' + render_id + '_init();</script>') +
 
+			'</body></html>'
+
+
+			// $('body').append(
+
+			// 		(_bundled_svg_client.slice(0, 4) + ' style="display: none !important;" id="' + render_id + '_svgs">' + _bundled_svg_client.slice(4)).replace(/\n/g, '') + 
+
+			// 		'<script>' +
+
+			// 		"function " + render_id + "_init(){" +
+
+			// 			"var styles = document.getElementById('" + render_id + "_styles');" +
+			// 			"var svgs = document.getElementById('" + render_id + "_svgs');" +
+
+			// 			// "if(styles.tagName.toUpperCase() === 'LINK'){" +
+			// 			// 	"styles = c('link', {key: styles.id, id:styles.id, rel:'stylesheet', type:'text/css', href:styles.href})" + 
+			// 			// "}" +
+
+			// 			// "else{" +
+			// 				"styles = c('style', {key: styles.id}, styles.innerHTML);" + 
+			// 			// "};" +
+
+			// 			// "var scripts = document.getElementById('" + render_id + "_scripts');" +
+
+			// 			// "if(scripts.src){" +
+			// 			// 	"scripts = c('script', {key: '" + render_id + "-styles', src:scripts.src})" + 
+			// 			// "}" +
+
+			// 			// "else{" +
+			// 			// 	"scripts = c('script', {key: '" + render_id + "-styles'}, scripts.innerHTML)" + 
+			// 			// "};" +
+
+			// 			"c.styles = styles;" + 
+			// 			// "c.scripts = scripts;" +
+			// 			// "c.svgs = c.trust('" + _bundled_svg_client + "');" +
+			// 			"c.svgs = c.trust(svgs.outerHTML);" + 
+			// 			"window.global_styles = '" + _bundled_styles_client_url + "';" +
+			// 			"c.store = new loki('crazy-taxi.db');" +
+			// 			"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
+			// 			"c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
+			// 		"}" +
+
+			// 		// "c.store = new loki('crazy-taxi.db');" +
+			// 		// "c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
+			// 		// "c.route.prefix('');c.route(document.documentElement, '/', window['" + _bundle_id + "']);" +
+
+			// 	'</script>' +
+
+			// 	(_bundled_scripts_client_url ? 
+			// 		('<script id="' + render_id + '_scripts">' + 
+			// 			"(function(c,r,a,z,y){" +
+			// 				"y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
+			// 			"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);" + 
+			// 		"</script>")
+			// 	:
+			// 		'<script id="' + render_id + '_scripts">' + _bundled_scripts_client + ' ' + render_id + '_init();</script>')
+			// )
+
+			// if(_bundled_scripts_client_url){
+			// 	$('body').append('<script id="' + render_id + '_scripts">' + 
+			// 		"(function(c,r,a,z,y){" +
+			// 			"y=c.createElement(r);s=c.getElementsByTagName(r)[0];y.src=a;y.addEventListener('load',z,false);s.parentNode.insertBefore(y,s);" +
+			// 		"})(document,'script','" + _bundled_scripts_client_url + "', " + render_id + "_init);" + 
+			// 	"</script>")
+			// 	// $('body').append('<script id="' + render_id + '_scripts" src="'+ _bundled_scripts_client_url +'"></script>')
+			// }
+
+			// else {
+			// 	$('body').append('<script id="' + render_id + '_scripts">' + _bundled_scripts_client + ' ' + render_id + '_init();</script>')
+			// 	// $('body').append('<script id="' + render_id + '_scripts">' + _bundled_scripts_client +'</script>')
+			// }
 
 			// var output_string = 
 			// '<html><head>' +
@@ -567,8 +639,8 @@ var router = function(relative_path) {
 				// 	"}" +
 
 				// '</script></body>'
-
-			return $.html()
+			// return $.html()
+			return output
 		})
 		.catch(function(error){
 
