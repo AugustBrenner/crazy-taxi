@@ -36,6 +36,13 @@ var Home = {
 	    }
 
 	},
+
+	oncreate: function(vnode){
+		console.log('init')
+		console.time('timer')
+		c.redraw()
+		console.timeEnd('timer')
+	},
  
 	view: function(vnode) {
 		return [
@@ -46,6 +53,9 @@ var Home = {
 			c('body', [
 				c('a', {href:'/page2', oncreate: c.route.link}, 'Page 2'),
 				c('pre', JSON.stringify(vnode.state.greetings, null, 4)),
+				// Array.apply(null, {length: 99999}).map(x => {
+				// 	return c('p', 'hello')
+				// }),
 			]),
 		]
 	}
