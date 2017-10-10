@@ -354,10 +354,10 @@ var router = function(relative_path) {
 		// if(!SETTINGS.get('production')) 
 		console.log('[webpack:build]', stats.toString({
             chunks: false,
+            chunkModules: false,
+            modules: false,
+            timings: true,
             colors: true,
-            // chunks: true,
-            // maxModules: Infinity,
-            // exclude: undefined,
         }))
 
 		try{
@@ -659,10 +659,10 @@ var router = function(relative_path) {
 		// if(!SETTINGS.get('production')) 
 		console.log('[webpack:build]', stats.toString({
             chunks: false,
+            chunkModules: false,
+            modules: false,
+            timings: true,
             colors: true,
-            // chunks: true,
-            // maxModules: Infinity,
-            // exclude: undefined,
         }))
 
 		try{
