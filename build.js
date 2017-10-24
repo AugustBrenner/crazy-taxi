@@ -17,6 +17,7 @@ var url 				= require('url')
 var AWS 				= require('aws-sdk')
 var loki 				= require('lokijs')
 var cheerio 			= require('cheerio')
+var argv 				= require('yargs').argv
 
 var renderHyperscript 	= require('mithril-node-render')
 var hyperscript 		= require('mithril/hyperscript')
@@ -25,6 +26,9 @@ var Request 			= require('./request.js')
 var SETTINGS 			= require('./settings.js')
 
 // SETTINGS.set('production', true)
+
+
+var build_count = 0
 
 
 shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$_')
@@ -60,10 +64,40 @@ function _getCallerFile() {
 
 
 
+function _getRootDir(caller_dir_path){
+
+	var path_array = caller_dir_path.split(path.sep)
+
+	var root_dir
+
+	while(path_array.length > 0){
+
+		var current_dir = path_array.join(path.sep)
+
+		var files_in_dir = fs.readdirSync(current_dir)
+
+		if(files_in_dir.indexOf('package.json') > -1 || files_in_dir.indexOf('node_modules') > -1){
+
+			root_dir = current_dir
+
+			break
+		}
+
+		path_array.pop()
+	}
+
+	if(!root_dir) throw 'Root directory not found.'
+
+	return root_dir
+
+}
+
 
 
 
 var router = function(relative_path) {
+
+	var cache = {}
 
 	var config = {}
 
@@ -72,18 +106,45 @@ var router = function(relative_path) {
 	var _target_file_path  = path.resolve(_caller_dir_path, relative_path)
 
 	var _compiled_files = {view: function(){}}
+
+	var _use_cache
+
+	var saveBundle = function(value){
+		
+		Object.assign(cache, value)
+
+		fs.writeFileSync(path.join(_getRootDir(_caller_dir_path), '.crazy-taxi-cache.json'), JSON.stringify(cache))
+
+		if(build_count === 0) process.exit()
+	}
+
+	if(argv['use-cache']){
+
+		try{
+			cache = JSON.parse(fs.readFileSync(path.join(_getRootDir(_caller_dir_path), '.crazy-taxi-cache.json'))) || {}
+			console.log(Object.keys(cache))
+			_use_cache = true
+		}
+		catch(e){
+			console.error('No cache found.')
+
+			_use_cache = false
+
+			cache = {}
+		}
+	}
 	
-	var _bundled_scripts_server = ''
+	var _bundled_scripts_server = cache._bundled_scripts_server || ''
 
-	var _bundled_scripts_client = ''
+	var _bundled_scripts_client = cache._bundled_scripts_client || ''
 
-	var _bundled_svg_client = ''
+	var _bundled_svg_client = cache._bundled_svg_client || ''
 
-	var _bundled_scripts_client_url = ''
+	var _bundled_scripts_client_url = cache._bundled_scripts_client_url || ''
 
-	var _bundled_styles_client = ''
+	var _bundled_styles_client = cache._bundled_styles_client || ''
 
-	var _bundled_styles_client_url = ''
+	var _bundled_styles_client_url = cache._bundled_styles_client_url || ''
 
 	var _server_router = Router({}, function(){})
 
@@ -91,7 +152,7 @@ var router = function(relative_path) {
 
 	var _bundle_id = shortid.generate()
 
-	var fs = new MemoryFS()
+	var _memory_fs = new MemoryFS()
 
 
 
@@ -177,7 +238,7 @@ var router = function(relative_path) {
 				// 	loader: 'expose-loader?loki'
 				// },
 				{
-					test: /mithril\/mithril\.min\.js/,
+					test: /mithril\/index\.js/,
 					loader: 'expose-loader?c'
 				},
 
@@ -205,7 +266,7 @@ var router = function(relative_path) {
 		},
 		resolve: {
 			alias: {
-				'crazy-taxi': 'mithril/mithril.min.js',
+				'crazy-taxi': 'mithril/index.js',
 				// 'crazy-taxi': path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
 				// 'lokijs': path.resolve(__dirname, 'node_modules/lokijs'),
 			}
@@ -335,18 +396,22 @@ var router = function(relative_path) {
 		plugins: [
 	      	new StringReplacePlugin(),
 		],
-	   	devtool: 'inline-source-map'
+	   	devtool: 'cheap-eval-source-map'
 	}
 
 
 	var compiler_client = webpack(webpack_config_client)
 
-	compiler_client.outputFileSystem = fs
+	compiler_client.outputFileSystem = _memory_fs
+
+	build_count++
 
 
 	var compiler_server = webpack(webpack_config_server)
 
-	compiler_server.outputFileSystem = fs
+	compiler_server.outputFileSystem = _memory_fs
+
+	build_count++
 
 
 	var bundleFilesClient = function(err, stats) {
@@ -363,20 +428,22 @@ var router = function(relative_path) {
 		try{
 
 			// console.log(path.resolve(_caller_dir_path, 'bundle.js'))
-	  		_bundled_scripts_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.js'), 'utf8')
+	  		_bundled_scripts_client = _memory_fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.js'), 'utf8')
 
 	  		if(Object.keys(stats.compilation.assets).indexOf('bundle_client.css') > -1){
 
-	  			_bundled_styles_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.css'), 'utf8')
+	  			_bundled_styles_client = _memory_fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.css'), 'utf8')
 
-	  			_bundled_scripts_client += '(function(){'+
-	  				'c.styles = c("style",{key:"styles"},' + JSON.stringify(_bundled_styles_client).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ');' +
-	  			'})();'
+	  			// _bundled_scripts_client += '(function(){'+
+	  			// 	'c.styles = c("style",{key:"styles"},' + JSON.stringify(_bundled_styles_client).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ');' +
+	  			// '})();'
+
+	  			if(argv.build) saveBundle({_bundled_styles_client: _bundled_styles_client})
 	  		}
 	  		
 	  		if(Object.keys(stats.compilation.assets).indexOf('bundle_client.svg') > -1){
 
-	  			_bundled_svg_client = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.svg'), 'utf8')
+	  			_bundled_svg_client = _memory_fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_client.svg'), 'utf8')
 
 	  			_bundled_svg_client = (_bundled_svg_client.slice(0, 4) + ' style="display: none !important;"' + _bundled_svg_client.slice(4)).replace(/\n/g, '')
 
@@ -385,7 +452,7 @@ var router = function(relative_path) {
 	  			'})();'
 	  		}
 
-	  		// _source_maps = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js.map'), 'utf8')
+	  		// _source_maps = _memory_fs.readFileSync(path.resolve(_caller_dir_path, 'bundle.js.map'), 'utf8')
 
 
 	  		if(SETTINGS.get('production') && config.s3){
@@ -408,6 +475,10 @@ var router = function(relative_path) {
 					console.log('Successfully uploaded client scripts')
 					
 					_bundled_scripts_client_url = config.cdn_url.replace(/\/$/, '') + '/' + stats.hash + '.bundle.js'
+
+					build_count--
+
+					if(argv.build) saveBundle({_bundled_scripts_client_url: _bundled_scripts_client_url})
 
 				})
 
@@ -433,6 +504,11 @@ var router = function(relative_path) {
 				// 		_bundled_styles_client_url = config.cdn_url.replace(/\/$/, '') + '/' + stats.hash + '.bundle.css'
 				// 	})
 				// }
+	  		}
+	  		else {
+
+	  			build_count--
+	  			if(argv.build) saveBundle({_bundled_scripts_client: _bundled_scripts_client})
 	  		}
 
 		}
@@ -596,7 +672,11 @@ var router = function(relative_path) {
 		try{
 
 
-	  		_bundled_scripts_server = fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_server.js'), 'utf8')
+	  		_bundled_scripts_server = _memory_fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_server.js'), 'utf8')
+
+	  		build_count--
+
+	  		if(argv.build) saveBundle({_bundled_scripts_server: _bundled_scripts_server})
 
 	  		_compiled_files = requireFromString(_bundled_scripts_server)
 
@@ -635,10 +715,38 @@ var router = function(relative_path) {
 	}
 
 
+	if(_use_cache){
 
+		console.log('Using Cache')
 
+		_compiled_files = requireFromString(_bundled_scripts_server)
 
-	if(SETTINGS.get('production')){
+		_server_router = Router(_compiled_files.routes, function(component, params, req, res, next){
+
+  			if(!component) return res.sendStatus(404)
+
+			var base_url = url.format({
+			    protocol: req.protocol,
+			    host: req.get('host'),
+			    pathname: req.originalUrl
+			})
+
+				render({
+					shim:_compiled_files.shim,
+					component: component,
+					requestHandler: Request({
+						headers: req.headers,
+						base_url: base_url,
+					}),
+					params: params,
+				})
+				.then(function(result){
+					res.send(result)
+				})
+  		})
+	}
+
+	else if(SETTINGS.get('production')){
 		
 		compiler_client.run(bundleFilesClient)
 
