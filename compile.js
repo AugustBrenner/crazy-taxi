@@ -9,6 +9,7 @@ var ExtractTextPlugin 	= require('extract-text-webpack-plugin')
 var styleLoader 		= require('style-loader')
 var cssLoader 			= require('css-loader')
 var deasync 			= require('deasync')
+var argv 				= require('yargs').argv
 
 var render 				= require('mithril-node-render')
 var hyperscript 		= require('mithril/hyperscript')
@@ -60,6 +61,8 @@ function _getCallerFile() {
 
 
 var compile = (input) => {
+
+	if(argv.build) return
 
 	var _caller_dir_path = path.dirname(_getCallerFile())
 
