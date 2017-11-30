@@ -45,6 +45,7 @@
     "svg-sprite-loader": "^3.4.1",
     "svgo": "^0.7.2",
     "svgo-loader": "^1.2.1",
+    "uglifyjs-webpack-plugin": "^1.1.1",
     "url-loader": "^0.5.9",
     "webpack": "^3.8.1",
     "webpack-append": "^0.1.2",

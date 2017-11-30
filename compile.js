@@ -6,6 +6,7 @@ var path 				= require('path')
 var fs 		 			= require('fs')
 var StringReplacePlugin = require("string-replace-webpack-plugin")
 var ExtractTextPlugin 	= require('extract-text-webpack-plugin')
+var UglifyJsPlugin 		= require('uglifyjs-webpack-plugin')
 var styleLoader 		= require('style-loader')
 var cssLoader 			= require('css-loader')
 var deasync 			= require('deasync')
@@ -151,18 +152,20 @@ var compile = (input) => {
                 debug: false
             }),
 			
-			new webpack.optimize.UglifyJsPlugin({
-		      	// sourceMap: webpack_config.devtool && (webpack_config.devtool.indexOf("sourcemap") >= 0 || webpack_config.devtool.indexOf("source-map") >= 0),
-		      	beautify: false,
-	            mangle: {
-	                screw_ie8: true,
-	                keep_fnames: true
-	            },
-	            compress: {
-	                screw_ie8: true,
-	                warnings: false
-	            },
-	            comments: false
+			new UglifyJsPlugin({
+				uglifyOptions: {
+					ie8: false,
+					ecma: 8,
+					mangle: {
+		                screw_ie8: true,
+		                keep_fnames: true
+		            },
+					output: {
+						comments: false,
+						beautify: false,
+					},
+					warnings: false
+				}
 		    }),
 
 		    new webpack.DefinePlugin({
