@@ -305,7 +305,6 @@ var router = function(relative_path) {
 					ie8: false,
 					ecma: 8,
 					mangle: {
-		                screw_ie8: true,
 		                keep_fnames: true
 		            },
 					output: {
