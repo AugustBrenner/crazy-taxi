@@ -214,7 +214,7 @@ var router = function(relative_path) {
 			      	use: {
 			        	loader: 'babel-loader',
 			        	options: {
-        					presets: ['babel-preset-env'].map(require.resolve),
+        					presets: ['@babel/preset-env'].map(require.resolve),
       					}
 			      	}
 			    },
@@ -299,18 +299,20 @@ var router = function(relative_path) {
 	            debug: false
 	        }),
 			
-			new webpack.optimize.UglifyJsPlugin({
-		      	// sourceMap: webpack_config_client.devtool && (webpack_config_client.devtool.indexOf("sourcemap") >= 0 || webpack_config_client.devtool.indexOf("source-map") >= 0),
-		      	beautify: false,
-	            mangle: {
-	                screw_ie8: true,
-	                keep_fnames: true
-	            },
-	            compress: {
-	                screw_ie8: true,
-	                warnings: false
-	            },
-	            comments: false
+			new UglifyJsPlugin({
+				uglifyOptions: {
+					ie8: false,
+					ecma: 8,
+					mangle: {
+		                screw_ie8: true,
+		                keep_fnames: true
+		            },
+					output: {
+						comments: false,
+						beautify: false,
+					},
+					warnings: false
+				}
 		    }),
 
 		    new webpack.DefinePlugin({
@@ -385,7 +387,7 @@ var router = function(relative_path) {
 			      	use: {
 			        	loader: 'babel-loader',
 			        	options: {
-        					presets: ['babel-preset-env'].map(require.resolve),
+        					presets: ['@babel/preset-env'].map(require.resolve),
       					}
 			      	}
 			    },
