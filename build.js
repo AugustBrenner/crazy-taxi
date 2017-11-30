@@ -214,7 +214,7 @@ var router = function(relative_path) {
 			      	use: {
 			        	loader: 'babel-loader',
 			        	options: {
-        					presets: ['@babel/preset-env'].map(require.resolve),
+        					presets: ['babel-preset-env'].map(require.resolve),
       					}
 			      	}
 			    },
@@ -387,7 +387,7 @@ var router = function(relative_path) {
 			      	use: {
 			        	loader: 'babel-loader',
 			        	options: {
-        					presets: ['@babel/preset-env'].map(require.resolve),
+        					presets: ['babel-preset-env'].map(require.resolve),
       					}
 			      	}
 			    },
