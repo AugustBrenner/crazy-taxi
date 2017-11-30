@@ -230,7 +230,7 @@ var router = function(relative_path) {
 								spriteFilename: 'bundle_client.svg'
 							}
 						},
-						'svgo-loader'
+						// 'svgo-loader'
 					]
 				},
 				// {
