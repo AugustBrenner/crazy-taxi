@@ -1,6 +1,6 @@
 {
   "name": "crazy-taxi",
-  "version": "0.3.24",
+  "version": "0.3.25",
   "description": "A wrapper around mithril that utilizes mithril-node-render and webpack to render mithril templates server side along with their bundle so that they function seamlessly on the client.",
   "main": "index.js",
   "scripts": {
@@ -48,6 +48,7 @@
     "url-loader": "^0.5.9",
     "webpack": "^3.8.1",
     "webpack-append": "^0.1.2",
+    "webpack-bundle-analyzer": "^2.9.1",
     "xhr-request": "^1.0.1",
     "yargs": "^10.0.3"
   }
