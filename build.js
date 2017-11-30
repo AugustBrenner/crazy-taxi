@@ -8,6 +8,8 @@ var fs 		 			= require('fs')
 var StringReplacePlugin = require("string-replace-webpack-plugin")
 var ExtractTextPlugin 	= require('extract-text-webpack-plugin')
 var SpriteLoaderPlugin 	= require('svg-sprite-loader/plugin')
+var SvgStorePlugin 		= require('external-svg-sprite-loader/lib/SvgStorePlugin')
+
 var UglifyJsPlugin 		= require('uglifyjs-webpack-plugin')
 var styleLoader 		= require('style-loader')
 var cssLoader 			= require('css-loader')
@@ -219,20 +221,30 @@ var router = function(relative_path) {
       					}
 			      	}
 			    },
-		        {
-					test: /\.svg$/,
-					use: [
-						{
-							loader: 'svg-sprite-loader',
-							options: {
-								symbolId: 'icon-[name]',
-								extract: true,
-								spriteFilename: 'bundle_client.svg'
-							}
-						},
-						// 'svgo-loader'
-					]
-				},
+			    {
+	                test: /\.svg$/,
+	                use: {
+	                	loader: 'external-svg-sprite-loader',
+	                	options: {
+	                		iconName: 'icon-[name]',
+	                		name: 'bundle_client.svg',
+	                	},
+	                }
+	            },
+		  //       {
+				// 	test: /\.svg$/,
+				// 	use: [
+				// 		{
+				// 			loader: 'svg-sprite-loader',
+				// 			options: {
+				// 				symbolId: 'icon-[name]',
+				// 				extract: true,
+				// 				spriteFilename: 'bundle_client.svg'
+				// 			}
+				// 		},
+				// 		'svgo-loader'
+				// 	]
+				// },
 				// {
 				// 	test: path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
 				// 	loader: 'expose-loader?c'
@@ -284,7 +296,9 @@ var router = function(relative_path) {
 	          	filename: 'bundle_client.css'
 	        }),
 
-	        new SpriteLoaderPlugin(),
+	        // new SpriteLoaderPlugin(),
+
+	        new SvgStorePlugin(),
 	   	],
 	   	devtool: SETTINGS.get('production') ? false : 'cheap-eval-source-map'
 	}
