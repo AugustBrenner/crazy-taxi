@@ -165,7 +165,24 @@ var router = function(relative_path) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	var webpack_config_client = {
+		mode: SETTINGS.get('production') ? 'production' : 'development',
 		entry: _target_file_path,
 		output: {
 			path: _caller_dir_path,
@@ -346,7 +363,31 @@ var router = function(relative_path) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	var webpack_config_server = {
+		mode: SETTINGS.get('production') ? 'production' : 'development',
 		entry: path.resolve(__dirname, 'bundle-bridge.js'),
 		output: {
 			path: _caller_dir_path,
@@ -418,6 +459,23 @@ var router = function(relative_path) {
 		],
 	   	devtool: 'cheap-eval-source-map'
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	var compiler_client = webpack(webpack_config_client)
@@ -810,7 +868,213 @@ var router = function(relative_path) {
 	}
 
 
-	if(_use_cache){
+
+	if(argv['build-mobile']){
+
+		if(!argv['output']) throw "'--output {directory path}' is required"
+
+
+		var webpack_config_mobile = {
+			mode: SETTINGS.get('production') ? 'production' : 'development',
+			entry: _target_file_path,
+			output: {
+				path: _caller_dir_path,
+		        filename: 'bundle_mobile.js',
+		        library: 'APP_BUNDLE',
+		        libraryTarget: 'umd'
+		    },
+		    // externals: {
+		    //     "crazy-taxi": 'm'
+		    // },
+		   node: {
+				fs: 'empty',
+				net: 'empty',
+				tls: 'empty',
+				'crypto': 'empty'
+			},
+		    module: {
+				rules: [
+
+				 	{
+			        	test: /\.css$/,
+			        	use: ExtractTextPlugin.extract({
+			              	fallback: 'style-loader',
+			              	use: {
+						      	loader: "css-loader",
+						      	options: {
+						      		minimize: true,
+						      		sourceMap: !SETTINGS.get('production'),
+						      	}
+						    },
+			          	})
+			        },
+					{ 
+			            test: /\.js$/,
+			            loader: StringReplacePlugin.replace({
+			                replacements: [
+			                    {
+			                        pattern: /c\.requireOnClient/g,
+			                        replacement: function (match, p1, offset, string) {
+			                            return 'require'
+			                        }
+			                    }
+			                ]
+			            })
+			        },
+			        {
+				      	test: /\.js$/,
+				      	// exclude: /(node_modules|bower_components)/,
+				      	use: {
+				        	loader: 'babel-loader',
+				        	options: {
+	        					presets: ['babel-preset-env'].map(require.resolve),
+	      					}
+				      	}
+				    },
+			        {
+						test: require.resolve('./mobile.js'),
+						loader: 'expose-loader?c'
+					},
+			        { 
+			            test: /\.js$/,
+			            loader: StringReplacePlugin.replace({
+			                replacements: [
+			                    {
+			                        pattern: /crazy-taxi/g,
+			                        replacement: function (match, p1, offset, string) {
+			                            return require.resolve('./mobile.js')
+			                        }
+			                    }
+			                ]
+			            })
+			        },
+				    {
+		                test: /\.svg$/,
+		                use: {
+		                	loader: 'external-svg-sprite-loader',
+		                	options: {
+		                		iconName: 'icon-[name]',
+		                		name: 'bundle_mobile.svg',
+		                	},
+		                }
+		            },
+				]
+			},
+			resolveLoader: {
+				modules: [
+					path.resolve(__dirname, 'node_modules'),
+					'node_modules',
+				],
+			},
+			plugins: [
+		      	new StringReplacePlugin(),
+
+
+		      	new ExtractTextPlugin({
+		          	filename: 'bundle_mobile.css'
+		        }),
+
+		        // new SpriteLoaderPlugin(),
+
+		        new SvgStorePlugin(),
+
+		        new webpack.DefinePlugin({
+			      	'process.env.CRAZY_TAXI_HOST': JSON.stringify(argv.host || ''),
+			    }),
+		   	],
+		   	// devtool: SETTINGS.get('production') ? false : 'cheap-eval-source-map'
+		}
+
+		if(SETTINGS.get('production')){
+
+			// webpack_config_mobile.devtool = 'source-map'
+
+			webpack_config_mobile.plugins = webpack_config_mobile.plugins.concat([
+
+				new webpack.LoaderOptionsPlugin({
+		            minimize: true,
+		            debug: false
+		        }),
+				
+				new UglifyJsPlugin({
+					uglifyOptions: {
+						ie8: false,
+						ecma: 8,
+						mangle: {
+			                keep_fnames: true
+			            },
+						output: {
+							comments: false,
+							beautify: false,
+						},
+						warnings: false
+					}
+			    }),
+
+			    new webpack.DefinePlugin({
+			      	'process.env.NODE_ENV': JSON.stringify('production'),
+			    }),
+
+			])
+
+		}
+
+
+
+
+		var compiler_mobile = webpack(webpack_config_mobile)
+
+		compiler_mobile.outputFileSystem = _memory_fs
+
+		compiler_mobile.run(function(err, stats) {
+
+
+			console.log('[webpack:build]', stats.toString({
+	            chunks: false,
+	            chunkModules: false,
+	            modules: false,
+	            timings: true,
+	            colors: true,
+	        }))
+
+			try{
+
+
+		  		var scripts_mobile = _memory_fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_mobile.js'), 'utf8')
+		  		var styles_mobile = _memory_fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_mobile.css'), 'utf8')
+		  		var svgs_mobile = _memory_fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_mobile.svg'), 'utf8')
+
+
+		  		var mobile_output_dir = path.resolve(_getRootDir(_caller_dir_path), argv['output'])
+
+		  		var count = 3
+		  		fs.writeFile(mobile_output_dir + '/bundle.js', scripts_mobile, (error, response) => {
+		  			console.log("Scripts Written to '" + mobile_output_dir + '/bundle.js' + "'.")
+		  			if(--count == 0) process.exit()
+		  		})
+		  		fs.writeFile(mobile_output_dir + '/bundle.css', styles_mobile, (error, response) => {
+		  			console.log("Styles Written to '" + mobile_output_dir + '/bundle.css' + "'.")
+		  			if(--count == 0) process.exit()
+		  		})
+		  		fs.writeFile(mobile_output_dir + '/bundle.svg', svgs_mobile, (error, response) => {
+		  			console.log("SVG Icons Written to '" + mobile_output_dir + '/bundle.svg' + "'.")
+		  			if(--count == 0) process.exit()
+		  		})
+
+
+			}
+			catch(error){
+
+				console.error(error)
+
+			}
+
+		})
+
+	}
+
+
+	else if(_use_cache){
 
 		console.log('Using Cache')
 

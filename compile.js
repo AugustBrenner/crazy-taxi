@@ -63,7 +63,7 @@ function _getCallerFile() {
 
 var compile = (input) => {
 
-	if(argv.build) return
+	if(argv.build || argv['build-mobile']) return
 
 	var _caller_dir_path = path.dirname(_getCallerFile())
 
@@ -82,6 +82,7 @@ var compile = (input) => {
 	var fs = new MemoryFS()
 
 	var webpack_config = {
+		mode: SETTINGS.get('production') ? 'production' : 'development',
 		entry: _target_file_path,
 		output: {
 			path: _caller_dir_path,
