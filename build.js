@@ -942,7 +942,7 @@ var router = function(relative_path) {
 			                    {
 			                        pattern: /crazy-taxi/g,
 			                        replacement: function (match, p1, offset, string) {
-			                            return require.resolve('./mobile.js')
+			                            return 'crazy-taxi/mobile'
 			                        }
 			                    }
 			                ]
@@ -1044,10 +1044,12 @@ var router = function(relative_path) {
 		  		var styles_mobile = _memory_fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_mobile.css'), 'utf8')
 		  		var svgs_mobile = _memory_fs.readFileSync(path.resolve(_caller_dir_path, 'bundle_mobile.svg'), 'utf8')
 
+		  		scripts_mobile += 'c.svgs = c.trust(\'<div style="display: none !important;">' + svgs_mobile + '</div>\');'
+
 
 		  		var mobile_output_dir = path.resolve(_getRootDir(_caller_dir_path), argv['output'])
 
-		  		var count = 3
+		  		var count = 2
 		  		fs.writeFile(mobile_output_dir + '/bundle.js', scripts_mobile, (error, response) => {
 		  			console.log("Scripts Written to '" + mobile_output_dir + '/bundle.js' + "'.")
 		  			if(--count == 0) process.exit()
@@ -1056,10 +1058,10 @@ var router = function(relative_path) {
 		  			console.log("Styles Written to '" + mobile_output_dir + '/bundle.css' + "'.")
 		  			if(--count == 0) process.exit()
 		  		})
-		  		fs.writeFile(mobile_output_dir + '/bundle.svg', svgs_mobile, (error, response) => {
-		  			console.log("SVG Icons Written to '" + mobile_output_dir + '/bundle.svg' + "'.")
-		  			if(--count == 0) process.exit()
-		  		})
+		  		// fs.writeFile(mobile_output_dir + '/bundle.svg', svgs_mobile, (error, response) => {
+		  		// 	console.log("SVG Icons Written to '" + mobile_output_dir + '/bundle.svg' + "'.")
+		  		// 	if(--count == 0) process.exit()
+		  		// })
 
 
 			}
