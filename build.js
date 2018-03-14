@@ -456,8 +456,13 @@ var router = function(relative_path) {
 		},
 		plugins: [
 	      	new StringReplacePlugin(),
+	      	new webpack.BannerPlugin({
+	      		banner: 'require("source-map-support").install();',
+	      		raw: true,
+	      		entryOnly: false,
+	      	}),
 		],
-	   	devtool: 'cheap-eval-source-map'
+	   	devtool: 'sourcemap'
 	}
 
 
