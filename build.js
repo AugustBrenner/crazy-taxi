@@ -347,7 +347,8 @@ var router = function(relative_path) {
 		    }),
 
 		    new webpack.DefinePlugin({
-		      	'process.env.NODE_ENV': JSON.stringify('production')
+		      	'process.env.NODE_ENV': JSON.stringify('production'),
+		      	'process.env.CRAZY_TAXI_HOST': '',
 		    })
 
 		])
@@ -1032,6 +1033,9 @@ var router = function(relative_path) {
 		compiler_mobile.outputFileSystem = _memory_fs
 
 		compiler_mobile.run(function(err, stats) {
+
+
+			if(err) console.log(err)
 
 
 			console.log('[webpack:build]', stats.toString({
