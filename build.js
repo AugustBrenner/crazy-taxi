@@ -277,7 +277,7 @@ var router = function(relative_path) {
 				// },
 
 				{
-					test: /mithril\.min/,
+					test: /mithril\/index/,
 					use: [{
 						loader: 'expose-loader',
 						options: 'c'
@@ -316,8 +316,8 @@ var router = function(relative_path) {
 		},
 		resolve: {
 			alias: {
-				// 'crazy-taxi': 'mithril/index.js',
-				'crazy-taxi': 'node_modules/mithril/mithril.min.js',
+				'crazy-taxi': 'mithril/index.js',
+				// 'crazy-taxi': 'node_modules/mithril/mithril.min.js',
 				// 'crazy-taxi': ['node_modules/mithril/mithril.min.js', path.resolve(__dirname, 'node_modules/mithril/mithril.min.js')],
 				// 'lokijs': ['node_modules/lokijs', path.resolve(__dirname, 'node_modules/lokijs')],
 			},
