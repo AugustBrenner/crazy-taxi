@@ -271,15 +271,31 @@ var router = function(relative_path) {
 				// 	test: path.resolve(__dirname, 'node_modules/lokijs'),
 				// 	loader: 'expose-loader?loki'
 				// },
+				// {
+				// 	test: /mithril\.min/,
+				// 	loader: 'expose-loader?c'
+				// },
+
 				{
-					test: /mithril\/index\.js/,
-					loader: 'expose-loader?c'
+					test: /mithril\.min/,
+					use: [{
+						loader: 'expose-loader',
+						options: 'c'
+					}]
 				},
 
 				{
 					test: /lokijs/,
-					loader: 'expose-loader?loki'
+					use: [{
+						loader: 'expose-loader',
+						options: 'loki'
+					}]
 				},
+
+				// {
+				// 	test: /lokijs/,
+				// 	loader: 'expose-loader?loki'
+				// },
 				{
 					test: _target_file_path,
 					loader: 'webpack-append',
@@ -300,10 +316,14 @@ var router = function(relative_path) {
 		},
 		resolve: {
 			alias: {
-				'crazy-taxi': 'mithril/index.js',
-				// 'crazy-taxi': path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
-				// 'lokijs': path.resolve(__dirname, 'node_modules/lokijs'),
-			}
+				// 'crazy-taxi': 'mithril/index.js',
+				'crazy-taxi': path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
+				'lokijs': path.resolve(__dirname, 'node_modules/lokijs'),
+			},
+			// modules: [
+			// 	path.resolve(__dirname, 'node_modules'),
+			// 	'node_modules',
+			// ],
 		},
 		plugins: [
 	      	new StringReplacePlugin(),
