@@ -317,8 +317,9 @@ var router = function(relative_path) {
 		resolve: {
 			alias: {
 				// 'crazy-taxi': 'mithril/index.js',
-				'crazy-taxi': path.resolve(__dirname, 'node_modules/mithril/mithril.min.js'),
-				'lokijs': path.resolve(__dirname, 'node_modules/lokijs'),
+				'crazy-taxi': 'node_modules/mithril/mithril.min.js',
+				// 'crazy-taxi': ['node_modules/mithril/mithril.min.js', path.resolve(__dirname, 'node_modules/mithril/mithril.min.js')],
+				// 'lokijs': ['node_modules/lokijs', path.resolve(__dirname, 'node_modules/lokijs')],
 			},
 			// modules: [
 			// 	path.resolve(__dirname, 'node_modules'),
