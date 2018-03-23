@@ -316,6 +316,11 @@ var router = function(relative_path) {
 	        // new SpriteLoaderPlugin(),
 
 	        new SvgStorePlugin(),
+
+	        new webpack.DefinePlugin({
+		      	'process.env.CRAZY_TAXI_HOST': JSON.stringify(''),
+		      	'process.env.NODE_ENV': JSON.stringify(SETTINGS.get('production') ? 'production' : 'development'),
+		    }),
 	   	],
 	   	devtool: SETTINGS.get('production') ? false : 'cheap-eval-source-map'
 	}
@@ -345,11 +350,6 @@ var router = function(relative_path) {
 					warnings: false
 				}
 		    }),
-
-		    new webpack.DefinePlugin({
-		      	'process.env.NODE_ENV': JSON.stringify('production'),
-		      	'process.env.CRAZY_TAXI_HOST': '',
-		    })
 
 		])
 
@@ -462,6 +462,10 @@ var router = function(relative_path) {
 	      		raw: true,
 	      		entryOnly: false,
 	      	}),
+	      	new webpack.DefinePlugin({
+		      	'process.env.CRAZY_TAXI_HOST': JSON.stringify(''),
+		      	'process.env.NODE_ENV': JSON.stringify(SETTINGS.get('production') ? 'production' : 'development'),
+		    }),
 		],
 	   	devtool: 'sourcemap'
 	}

@@ -35,7 +35,7 @@
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "file-loader": "^1.1.5",
     "ignore-loader": "^0.1.2",
-    "lokijs": "^1.5.0",
+    "lokijs": "^1.5.3",
     "memory-fs": "^0.4.1",
     "mithril": "^1.1.6",
     "mithril-node-render": "2.0.2",
