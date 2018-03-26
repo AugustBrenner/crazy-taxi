@@ -525,6 +525,11 @@ var router = function(relative_path) {
 
 	var bundleFilesClient = function(err, stats) {
 
+		if(err) {
+			console.error(err)
+			throw err
+		}
+
 		// if(!SETTINGS.get('production')) 
 		console.log('[webpack:build]', stats.toString({
             chunks: false,
@@ -844,6 +849,11 @@ var router = function(relative_path) {
 
 	var bundleFilesServer = function(err, stats) {
 
+		if(err) {
+			console.error(err)
+			throw err
+		}
+
 		// if(!SETTINGS.get('production')) 
 		console.log('[webpack:build]', stats.toString({
             chunks: false,
@@ -1059,9 +1069,10 @@ var router = function(relative_path) {
 
 		compiler_mobile.run(function(err, stats) {
 
-
-			if(err) console.log(err)
-
+			if(err) {
+				console.error(err)
+				throw err
+			}
 
 			console.log('[webpack:build]', stats.toString({
 	            chunks: false,
