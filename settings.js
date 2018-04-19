@@ -1,7 +1,8 @@
 'use strict'
 
 var SETTINGS = {
-	production: false
+	production: false,
+	env: {},
 }
 
 

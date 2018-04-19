@@ -651,6 +651,7 @@ var router = function(relative_path) {
 			store: store,
 			component: params.component,
 			requestHandler: params.requestHandler,
+			environment_variables: params.environment_variables,
 			params: params.params,
 			// scripts: "<script>" +
 
@@ -678,7 +679,6 @@ var router = function(relative_path) {
 			// else {
 				// $('head').append('<style id="' + render_id + '_styles">' + _bundled_styles_client + '</style>')
 			// }
-
 
 			output = '<!doctype html>' +
 			'<html><head>' + '<style id="' + render_id + '_styles">' + _bundled_styles_client + '</style>' + output.slice(6, -7) +
@@ -714,6 +714,8 @@ var router = function(relative_path) {
 					// "c.scripts = scripts;" +
 					// "c.svgs = c.trust('" + _bundled_svg_client + "');" +
 					"c.svgs = c.trust(svgs.outerHTML);" + 
+
+					"c.env = " + JSON.stringify(SETTINGS.get('env') || {}) + ';' +
 					// "window.global_styles = '" + _bundled_styles_client_url + "';" +
 					"c.store = new loki('crazy-taxi.db');" +
 					"c.store.loadJSON(" + JSON.stringify(store.serialize()).replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029') + ");" +
@@ -892,6 +894,7 @@ var router = function(relative_path) {
   						base_url: base_url,
   					}),
   					params: params,
+  					environment_variables: SETTINGS.get('env'),
   				})
   				.then(function(result){
   					res.send(result)
@@ -1091,6 +1094,8 @@ var router = function(relative_path) {
 
 		  		scripts_mobile += 'c.svgs = c.trust(\'<div style="display: none !important;">' + svgs_mobile + '</div>\');'
 
+		  		scripts_mobile += 'c.env = ' + JSON.stringify(SETTINGS.get('env') || {}) + ';'
+
 
 		  		var mobile_output_dir = path.resolve(_getRootDir(_caller_dir_path), argv['output'])
 
@@ -1144,6 +1149,7 @@ var router = function(relative_path) {
 						headers: req.headers,
 						base_url: base_url,
 					}),
+					environment_variables: SETTINGS.get('env'),
 					params: params,
 				})
 				.then(function(result){
