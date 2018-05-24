@@ -114,12 +114,17 @@ var RequestClosure = function(request_options){
 				if(request_options.headers) params.headers = request_options.headers
 			}
 
-			requestHandler(params.uri, params, function (error, data) {
+			var req = requestHandler(params.uri, params, function (error, data) {
 				
 				// Don't throw errors on xhr.abort().
 				// if(aborted) return
 				
 				if (error) return reject(error)
+
+				try{
+					if (req.connection._httpMessage.res.statusCode >= 400) return reject(data)
+				}
+				catch(e){}
 
 				resolve(cast(args.type, data))
 			})
